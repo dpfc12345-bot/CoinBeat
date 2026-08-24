@@ -1,0 +1,13 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap");
+
+:root {
+  --mp-bg: #080a0b;
+  --mp-card: #111516;
+  --mp-card-raised: #171d1d;
+  --mp-text: #f4f7f1;
+  --mp-muted: #81908b;
+  --mp-border: #26302e;
+  --mp-lime: #c9f64a;
+  --mp-amber: #ffb86b;
+  --mp-red: #ff7a80;
+}
