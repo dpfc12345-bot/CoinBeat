@@ -1,0 +1,724 @@
+# Market Pulse — Crypto News & Market Intelligence App
+
+## 1. 프로젝트 목표
+
+코인니스(Coinness)의 뉴스 API를 연동하고, 별도의 실시간 암호화폐 시세 API와 결합하여 **뉴스 + 시장 움직임을 한눈에 보여주는 모바일 중심 금융정보 앱**을 개발한다.
+
+단순한 뉴스 복제 앱이 아니라,
+
+**뉴스 발생 → 관련 코인 식별 → 가격 변화 → 거래량 변화 → 시장 반응**
+
+을 하나의 화면에서 보여주는 것이 핵심이다.
+
+서비스의 임시 이름은 **Market Pulse**로 한다.
+
+---
+
+# 2. 핵심 방향
+
+사용자가 앱을 열었을 때 가장 먼저 알아야 하는 것은 다음 3가지다.
+
+1. 지금 시장에서 무슨 일이 일어나고 있는가?
+2. 어떤 뉴스가 중요한가?
+3. 그 뉴스 이후 실제 가격이 어떻게 움직였는가?
+
+따라서 뉴스 목록을 단순히 나열하지 말고 **실시간 시장 상황 중심의 UI**로 설계한다.
+
+---
+
+# 3. 기술 스택
+
+Replit 환경에 최적화하여 구현한다.
+
+### Frontend
+
+* React
+* TypeScript
+* Vite
+* Tailwind CSS
+* shadcn/ui
+* Lucide Icons
+* Responsive design
+* Mobile-first
+
+### Backend
+
+* Node.js
+* Express
+* TypeScript
+
+### 데이터
+
+* Coinness News API
+* Crypto market price API
+* WebSocket 또는 polling 방식의 실시간 가격 업데이트
+
+### 저장
+
+초기 버전에서는 PostgreSQL을 사용할 수 있도록 구조를 준비하되, MVP에서는 필요한 데이터만 저장한다.
+
+---
+
+# 4. 중요한 개발 원칙
+
+## API Key 보안
+
+절대로 Coinness API Key나 기타 API Key를 frontend 코드에 노출하지 않는다.
+
+모든 외부 API 호출은 backend를 통해 처리한다.
+
+Frontend:
+
+GET /api/news
+
+Backend:
+
+Coinness API → Backend → Frontend
+
+환경변수:
+
+COINNESS_API_KEY
+COINNESS_API_URL
+MARKET_API_KEY
+MARKET_API_URL
+
+API Key가 없는 상태에서도 개발할 수 있도록 mock data fallback을 구현한다.
+
+---
+
+# 5. 메인 화면
+
+모바일 화면을 가장 우선적으로 디자인한다.
+
+전체적인 디자인은:
+
+* Dark mode 기본
+* 금융/트레이딩 앱 느낌
+* 검정 또는 매우 어두운 배경
+* 강한 타이포그래피
+* 숫자를 크게 표시
+* 불필요한 장식 최소화
+* 정보 밀도가 높지만 복잡하지 않게
+* 실시간성이 느껴지는 UI
+
+Apple/TradingView/Bloomberg 스타일의 정보 전달력을 참고하되 디자인을 그대로 복제하지 않는다.
+
+---
+
+# 6. 메인 화면 구조
+
+## Header
+
+왼쪽:
+
+MARKET PULSE
+
+오른쪽:
+
+🔔 알림
+⚙ 설정
+
+---
+
+## Market Overview
+
+가로 스크롤 가능한 코인 카드:
+
+BTC
+$113,240
++3.82%
+
+ETH
+$4,182
++2.14%
+
+XRP
+$2.91
+-0.72%
+
+SOL
+$201.42
++4.21%
+
+각 카드에는 작은 sparkline chart를 표시한다.
+
+---
+
+# 7. Market Sentiment
+
+큰 카드 형태:
+
+MARKET SENTIMENT
+
+78
+
+GREED
+
+간단한 게이지 또는 원형 그래프로 표현한다.
+
+향후 Fear & Greed API를 연결할 수 있도록 데이터 구조를 분리한다.
+
+---
+
+# 8. Breaking News
+
+메인 화면에서 가장 중요한 영역이다.
+
+제목:
+
+🔴 BREAKING NEWS
+
+뉴스를 최신순으로 표시한다.
+
+각 뉴스:
+
+* 중요도
+* 제목
+* 시간
+* 관련 코인
+* 뉴스 출처
+* 가격 변화
+
+예:
+
+🔴 BREAKING
+
+Bitcoin breaks $113K as ETF inflows accelerate
+
+3분 전
+
+BTC
+
++3.82%
+
+중요 뉴스는 시각적으로 강조한다.
+
+---
+
+# 9. News Feed
+
+뉴스 목록은 카드가 너무 크지 않도록 만든다.
+
+각 뉴스에는:
+
+* 시간
+* 제목
+* 관련 코인
+* 뉴스 카테고리
+* 중요도
+* 가격 변화
+
+를 표시한다.
+
+카테고리:
+
+MARKET
+ETF
+REGULATION
+EXCHANGE
+DEFI
+ALTCOIN
+MACRO
+SECURITY
+LISTING
+WHale
+
+카테고리는 추후 확장 가능하도록 enum/constant 구조로 만든다.
+
+---
+
+# 10. News Detail
+
+뉴스를 클릭하면 상세 페이지로 이동한다.
+
+상세 페이지:
+
+### 뉴스 제목
+
+뉴스 본문
+
+출처
+
+발행 시간
+
+관련 코인
+
+---
+
+### Market Reaction
+
+뉴스 발생 시점을 기준으로 가격 변화를 표시한다.
+
+예:
+
+Before News
+
+BTC
+$109,420
+
+↓
+
+After 5 min
+
+$111,820
+
++2.19%
+
+↓
+
+After 30 min
+
+$113,240
+
++3.49%
+
+차트로도 표시한다.
+
+---
+
+# 11. News Impact Score
+
+향후 핵심 차별화 기능이다.
+
+뉴스 하나에 대해:
+
+NEWS IMPACT
+
+92 / 100
+
+을 표시한다.
+
+초기 MVP에서는 실제 AI 분석을 구현하지 말고 Rule-based 방식으로 구현한다.
+
+예:
+
+Breaking News +20
+ETF +15
+Regulation +15
+Price Movement +20
+Volume Increase +20
+Social/News frequency +10
+
+최대 100점.
+
+데이터 구조는 향후 AI 모델을 연결할 수 있도록 분리한다.
+
+---
+
+# 12. News Impact Widget
+
+메인 화면에 다음과 같은 위젯을 만든다.
+
+🔥 NEWS IMPACT
+
+BTC
+
++3.82%
+
+Volume
++126%
+
+News
+17
+
+Impact
+92
+
+사용자가 이 위젯을 클릭하면 해당 뉴스와 시장 반응 페이지로 이동한다.
+
+---
+
+# 13. Top Movers
+
+다음 영역을 만든다.
+
+TOP MOVERS
+
+GAINERS
+
+BTC +3.82%
+SOL +4.21%
+DOGE +5.12%
+
+LOSERS
+
+XRP -0.72%
+ADA -1.83%
+
+각 코인 클릭 시 해당 코인의 상세 화면으로 이동한다.
+
+---
+
+# 14. Coin Detail
+
+코인 상세 페이지:
+
+BTC
+
+$113,240
+
++3.82%
+
+차트
+
+24H
+7D
+30D
+
+---
+
+관련 뉴스
+
+* Bitcoin ETF inflows...
+* BTC breaks resistance...
+* Institutional demand...
+
+---
+
+Market Stats
+
+24H Volume
+Market Cap
+Change
+High
+Low
+
+---
+
+# 15. 알림 시스템
+
+초기에는 UI만 구현하고 실제 Push Notification은 구조를 준비한다.
+
+사용자가 관심 코인을 선택할 수 있도록 한다.
+
+예:
+
+BTC
+ETH
+XRP
+SOL
+
+향후 다음 알림을 지원할 수 있도록 설계:
+
+* 가격 급등
+* 가격 급락
+* Breaking News
+* 특정 코인 뉴스
+* 거래량 급증
+* News Impact Score 80 이상
+
+---
+
+# 16. API Architecture
+
+Frontend가 Coinness API를 직접 호출하지 않는다.
+
+다음 구조로 만든다.
+
+Frontend
+↓
+Backend API
+↓
+Coinness API
+
+그리고 시장 데이터:
+
+Frontend
+↓
+Backend
+↓
+Market Data Provider
+
+Backend에는 Provider abstraction을 만든다.
+
+예:
+
+NewsProvider
+MarketDataProvider
+
+초기:
+
+CoinnessNewsProvider
+CryptoMarketProvider
+
+향후 다른 데이터 공급자를 쉽게 추가할 수 있도록 한다.
+
+---
+
+# 17. API Endpoint
+
+다음 REST API를 만든다.
+
+GET /api/news
+
+GET /api/news/:id
+
+GET /api/news/breaking
+
+GET /api/news/coin/:symbol
+
+GET /api/market/overview
+
+GET /api/market/:symbol
+
+GET /api/market/movers
+
+GET /api/market/sentiment
+
+GET /api/news/:id/impact
+
+GET /api/watchlist
+
+POST /api/watchlist
+
+DELETE /api/watchlist/:symbol
+
+---
+
+# 18. Mock Data
+
+Coinness API Key가 없는 경우에도 전체 UI를 테스트할 수 있어야 한다.
+
+MOCK_MODE=true
+
+일 경우 realistic한 뉴스와 시장 데이터를 사용한다.
+
+예:
+
+BTC
+$113,240
++3.82%
+
+뉴스:
+
+"Bitcoin ETF inflows accelerate as institutional demand rises"
+
+시간:
+
+3 minutes ago
+
+등의 데이터를 생성한다.
+
+실제 API 연결 후에는 mock data를 자동으로 사용하지 않도록 한다.
+
+---
+
+# 19. 실시간 업데이트
+
+MVP에서는 우선 polling 방식으로 구현한다.
+
+시장 데이터:
+
+5초~10초
+
+뉴스:
+
+15초~30초
+
+단, API Rate Limit을 고려하여 환경변수로 변경 가능하게 한다.
+
+향후 WebSocket으로 교체할 수 있도록 MarketDataProvider를 분리한다.
+
+---
+
+# 20. 반응형 디자인
+
+Mobile first.
+
+반드시 다음 화면 크기를 고려한다.
+
+375px
+390px
+414px
+768px
+1024px
+1440px
+
+모바일에서는 카드가 세로로 배치되고,
+
+Desktop에서는 Dashboard 형태로 구성한다.
+
+---
+
+# 21. PWA
+
+앱을 설치하지 않아도 모바일 브라우저에서 사용할 수 있도록 PWA를 구현한다.
+
+필수:
+
+* manifest
+* service worker
+* app icon
+* splash screen
+* standalone mode
+
+모바일 홈 화면에 추가했을 때 일반 앱처럼 보이도록 한다.
+
+---
+
+# 22. Navigation
+
+Mobile:
+
+Home
+News
+Markets
+Watchlist
+Settings
+
+Desktop:
+
+왼쪽 Sidebar 형태로 변경한다.
+
+---
+
+# 23. Watchlist
+
+사용자가 관심 코인을 등록할 수 있다.
+
+예:
+
+My Watchlist
+
+BTC
+ETH
+SOL
+XRP
+
+각 코인의:
+
+현재 가격
+등락률
+최근 뉴스
+
+를 표시한다.
+
+---
+
+# 24. 디자인 요구사항
+
+절대로 전형적인 "관리자 대시보드"처럼 만들지 않는다.
+
+피해야 할 것:
+
+* 지나치게 큰 카드
+* 과도한 rounded corner
+* 알록달록한 UI
+* 불필요한 gradient
+* 장식용 그래픽
+* 너무 많은 아이콘
+* 작은 글씨
+
+목표는:
+
+**"전문 트레이더가 하루 종일 켜놓는 시장 정보 화면"**
+
+이다.
+
+정보가 빠르게 눈에 들어와야 한다.
+
+---
+
+# 25. 애니메이션
+
+과도한 애니메이션은 사용하지 않는다.
+
+가격 변경 시:
+
+* 숫자 flash
+* 상승/하락 방향 표시
+* Breaking News 등장 animation
+* 새로운 뉴스가 들어왔을 때 subtle slide-in
+
+정도만 사용한다.
+
+---
+
+# 26. 개발 순서
+
+한 번에 모든 기능을 만들지 않는다.
+
+### Phase 1
+
+먼저 다음만 완성한다.
+
+1. 프로젝트 구조
+2. Dark UI
+3. Home Dashboard
+4. Market Overview
+5. Breaking News
+6. News Feed
+7. Mock API
+8. Backend API
+9. Responsive Mobile UI
+
+Phase 1을 완성하고 실행 가능한 상태를 만든다.
+
+---
+
+### Phase 2
+
+1. Coinness API 연결
+2. 실제 시장 데이터 API 연결
+3. News Detail
+4. Coin Detail
+5. Market Reaction
+6. Top Movers
+
+---
+
+### Phase 3
+
+1. News Impact Score
+2. Watchlist
+3. 가격 알림
+4. Breaking News 알림
+5. PWA
+6. Push Notification
+
+---
+
+# 27. 중요
+
+지금 단계에서 실제 API가 어떤 response format을 사용하는지 확인되지 않았다.
+
+따라서 Coinness API response schema를 추측해서 하드코딩하지 않는다.
+
+먼저 API documentation 또는 실제 API response를 확인하고,
+
+그 response를 내부 표준 데이터 모델로 변환한다.
+
+예:
+
+interface NewsItem {
+id: string;
+title: string;
+content?: string;
+source: string;
+publishedAt: string;
+categories: string[];
+relatedSymbols: string[];
+importance?: number;
+}
+
+Frontend는 Coinness의 원본 response에 직접 의존하지 않는다.
+
+---
+
+# 28. 최종 목표
+
+최종적으로 사용자가 앱을 열면 5초 안에 다음을 알 수 있어야 한다.
+
+**① 지금 시장이 오르고 있는가?**
+
+**② 지금 가장 중요한 뉴스는 무엇인가?**
+
+**③ 어떤 코인이 움직이고 있는가?**
+
+**④ 뉴스가 실제 가격에 영향을 주고 있는가?**
+
+이 네 가지를 중심으로 UX를 설계한다.
+
+먼저 Phase 1을 구현하고 실행한 뒤, 브라우저에서 실제 UI를 확인할 수 있도록 해라.
+
+코드를 작성하기 전에 전체 파일 구조와 구현 계획을 짧게 보여주고, 그 다음 Phase 1부터 구현한다.

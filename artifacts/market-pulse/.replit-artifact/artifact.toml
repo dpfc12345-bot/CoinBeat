@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/market-pulse/"
+title = "Market Pulse"
+description = "A mobile-first crypto market intelligence app that combines live-feeling market movement, breaking news, and news impact signals in one focused trading view."
+version = "1.0.0"
+id = "artifacts/market-pulse"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/market-pulse/" ]
+localPort = 25912
+
+[services.development]
+run = "pnpm --filter @workspace/market-pulse run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/market-pulse", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/market-pulse", "run", "serve" ]
+
+[services.env]
+PORT = "25912"
+BASE_PATH = "/market-pulse/"

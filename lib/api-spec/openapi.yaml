@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: market
+    description: Market intelligence operations
 paths:
   /healthz:
     get:
@@ -24,7 +26,155 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /news:
+    get:
+      operationId: getNews
+      tags: [market]
+      summary: List market news
+      responses:
+        "200":
+          description: Latest news
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NewsItem"
+  /news/breaking:
+    get:
+      operationId: getBreakingNews
+      tags: [market]
+      summary: Get breaking news
+      responses:
+        "200":
+          description: Breaking news
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NewsItem"
+  /news/{id}:
+    get:
+      operationId: getNewsById
+      tags: [market]
+      summary: Get a news item
+      parameters:
+        - $ref: "#/components/parameters/NewsId"
+      responses:
+        "200":
+          description: News item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewsItem"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /news/{id}/impact:
+    get:
+      operationId: getNewsImpact
+      tags: [market]
+      summary: Get rule-based impact score
+      parameters:
+        - $ref: "#/components/parameters/NewsId"
+      responses:
+        "200":
+          description: Impact score
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewsImpact"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /news/coin/{symbol}:
+    get:
+      operationId: getNewsByCoin
+      tags: [market]
+      summary: Get news for a market symbol
+      parameters:
+        - $ref: "#/components/parameters/Symbol"
+      responses:
+        "200":
+          description: Coin news
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NewsItem"
+  /market/overview:
+    get:
+      operationId: getMarketOverview
+      tags: [market]
+      summary: Get overview for the market dashboard
+      responses:
+        "200":
+          description: Market overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketOverview"
+  /market/movers:
+    get:
+      operationId: getMarketMovers
+      tags: [market]
+      summary: Get top market movers
+      responses:
+        "200":
+          description: Top movers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketMovers"
+  /market/sentiment:
+    get:
+      operationId: getMarketSentiment
+      tags: [market]
+      summary: Get market sentiment
+      responses:
+        "200":
+          description: Sentiment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sentiment"
+  /market/{symbol}:
+    get:
+      operationId: getMarketAsset
+      tags: [market]
+      summary: Get market asset details
+      parameters:
+        - $ref: "#/components/parameters/Symbol"
+      responses:
+        "200":
+          description: Market asset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketAsset"
+        "404":
+          $ref: "#/components/responses/NotFound"
 components:
+  parameters:
+    NewsId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    Symbol:
+      name: symbol
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    NotFound:
+      description: The requested market item was not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +183,87 @@ components:
           type: string
       required:
         - status
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+    NewsItem:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        content: { type: string }
+        source: { type: string }
+        publishedAt: { type: string, format: date-time }
+        relativeTime: { type: string }
+        categories:
+          type: array
+          items: { type: string }
+        relatedSymbols:
+          type: array
+          items: { type: string }
+        importance: { type: string, enum: [breaking, high, standard] }
+        priceChange: { type: number }
+        impactScore: { type: number }
+        volumeChange: { type: number }
+      required: [id, title, content, source, publishedAt, relativeTime, categories, relatedSymbols, importance, priceChange, impactScore, volumeChange]
+    MarketAsset:
+      type: object
+      properties:
+        symbol: { type: string }
+        name: { type: string }
+        price: { type: number }
+        change24h: { type: number }
+        volume24h: { type: string }
+        marketCap: { type: string }
+        high24h: { type: number }
+        low24h: { type: number }
+        sparkline:
+          type: array
+          items: { type: number }
+        accent: { type: string }
+      required: [symbol, name, price, change24h, volume24h, marketCap, high24h, low24h, sparkline, accent]
+    Sentiment:
+      type: object
+      properties:
+        score: { type: number }
+        label: { type: string, enum: [GREED, FEAR, NEUTRAL] }
+        change: { type: number }
+      required: [score, label, change]
+    MarketOverview:
+      type: object
+      properties:
+        assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/MarketAsset"
+        sentiment:
+          $ref: "#/components/schemas/Sentiment"
+        totalMarketCap: { type: string }
+        totalVolume: { type: string }
+        btcDominance: { type: string }
+        updatedAt: { type: string }
+      required: [assets, sentiment, totalMarketCap, totalVolume, btcDominance, updatedAt]
+    MarketMovers:
+      type: object
+      properties:
+        gainers:
+          type: array
+          items:
+            $ref: "#/components/schemas/MarketAsset"
+        losers:
+          type: array
+          items:
+            $ref: "#/components/schemas/MarketAsset"
+      required: [gainers, losers]
+    NewsImpact:
+      type: object
+      properties:
+        newsId: { type: string }
+        score: { type: number }
+        priceChange: { type: number }
+        volumeChange: { type: number }
+      required: [newsId, score, priceChange, volumeChange]
 

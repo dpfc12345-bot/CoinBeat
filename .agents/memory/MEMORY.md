@@ -1,0 +1,1 @@
+- [OpenAPI Zod integer compatibility](openapi-zod-integer.md) — Numeric score schemas use OpenAPI `number`; `integer` generates an unavailable Zod helper here.
