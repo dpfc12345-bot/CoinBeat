@@ -1,1 +1,2 @@
 - [OpenAPI Zod integer compatibility](openapi-zod-integer.md) — Numeric score schemas use OpenAPI `number`; `integer` generates an unavailable Zod helper here.
+- [News-first widget direction](news-first-widget-direction.md) — Market Pulse widgets prioritize Coinness headlines over price dashboards, using restrained Korean editorial UI.

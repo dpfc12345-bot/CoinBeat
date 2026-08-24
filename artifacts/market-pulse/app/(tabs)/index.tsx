@@ -19,29 +19,29 @@ export default function HomeScreen() {
     setSnapshot(getMockSnapshot(tick));
   }, [tick]);
   return <Screen>
-    <ScreenHeader eyebrow="LIVE MARKET INTELLIGENCE" title="Market Pulse" onPress={() => router.push('/settings')} />
+    <ScreenHeader eyebrow="실시간 뉴스 인텔리전스" title="Market Pulse" onPress={() => router.push('/settings')} />
     <View style={[styles.status, { backgroundColor: colors.muted, borderColor: colors.border }]}>
       <View style={[styles.statusDot, { backgroundColor: colors.primary }]} />
-      <Text style={[styles.statusText, { color: colors.mutedForeground }]}>MOCK LIVE · REFRESH 8S</Text>
+      <Text style={[styles.statusText, { color: colors.mutedForeground }]}>목업 라이브 · 8초마다 갱신</Text>
     </View>
     <View style={styles.overviewIntro}>
-      <Text style={[styles.overviewTitle, { color: colors.foreground }]}>Market overview</Text>
-      <Text style={[styles.updatedText, { color: colors.mutedForeground }]}>A real-time read of price, volume, and sentiment.</Text>
+      <Text style={[styles.overviewTitle, { color: colors.foreground }]}>시장 개요</Text>
+      <Text style={[styles.updatedText, { color: colors.mutedForeground }]}>가격보다 뉴스와 시장 흐름을 빠르게 읽습니다.</Text>
     </View>
     <View style={styles.horizontalScroll}><View style={styles.marketRow}>{snapshot.assets.slice(0, 4).map((asset) => <MarketCard key={asset.symbol} asset={asset} />)}</View></View>
-    <SectionHeading label="Market sentiment" />
+    <SectionHeading label="시장 심리" />
     <SentimentCard score={snapshot.sentiment.score} label={snapshot.sentiment.label} change={snapshot.sentiment.change} />
-    <SectionHeading label="Breaking news" action="View all" onAction={() => router.push('/news')} />
+    <SectionHeading label="속보 뉴스" action="전체 보기" onAction={() => router.push('/news')} />
     <NewsRow item={mockNews[0]} featured />
-    <SectionHeading label="News impact" />
+    <SectionHeading label="뉴스 영향도" />
     <ImpactWidget item={mockNews[0]} />
-    <SectionHeading label="Top movers" action="Markets" onAction={() => router.push('/markets')} />
+    <SectionHeading label="주요 변동" action="시장" onAction={() => router.push('/markets')} />
     <TopMovers assets={snapshot.assets} />
     <View style={[styles.marketTape, { borderTopColor: colors.border }]}>
-      <Text style={[styles.tapeLabel, { color: colors.mutedForeground }]}>MARKET TAPE</Text>
-      <Text style={[styles.tapeValue, { color: colors.foreground }]}>MCAP {snapshot.totalMarketCap}</Text>
-      <Text style={[styles.tapeValue, { color: colors.foreground }]}>VOL {snapshot.totalVolume}</Text>
-      <Text style={[styles.tapeValue, { color: colors.primary }]}>BTC.D {snapshot.btcDominance}</Text>
+      <Text style={[styles.tapeLabel, { color: colors.mutedForeground }]}>시장 요약</Text>
+      <Text style={[styles.tapeValue, { color: colors.foreground }]}>시총 {snapshot.totalMarketCap}</Text>
+      <Text style={[styles.tapeValue, { color: colors.foreground }]}>거래량 {snapshot.totalVolume}</Text>
+      <Text style={[styles.tapeValue, { color: colors.primary }]}>BTC 비중 {snapshot.btcDominance}</Text>
     </View>
   </Screen>;
 }

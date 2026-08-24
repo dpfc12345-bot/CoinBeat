@@ -1,93 +1,80 @@
 import "./_group.css";
-import { ArrowUpRight, BellRing, ChevronRight, RadioTower, Zap } from "lucide-react";
-
-const assets = [
-  { symbol: "BTC", price: "$67,842", move: "+5.72%" },
-  { symbol: "ETH", price: "$3,486", move: "+4.18%" },
-  { symbol: "SOL", price: "$184.21", move: "+8.06%" },
-  { symbol: "XRP", price: "$0.612", move: "+2.31%" },
-];
+import { Bell, ChevronRight, Newspaper, Pause, X } from "lucide-react";
+import { useState } from "react";
 
 export function BreakingAlert() {
+  const [muted, setMuted] = useState(false);
+  const [opened, setOpened] = useState(false);
+
   return (
-    <main className="min-h-screen w-full overflow-hidden bg-[#080a0b] p-3 text-[var(--mp-text)]">
-      <button
-        type="button"
-        aria-label="Open Market Pulse: breaking Bitcoin ETF inflow alert"
-        className="group relative flex h-[294px] w-full max-w-[420px] flex-col overflow-hidden rounded-[22px] border border-[#53621e]/70 bg-[linear-gradient(135deg,#1a2116_0%,#101615_46%,#0c1010_100%)] p-[18px] text-left shadow-[0_20px_55px_rgba(0,0,0,.42)] transition duration-300 hover:border-[var(--mp-lime)]/80 hover:shadow-[0_24px_65px_rgba(159,196,41,.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mp-lime)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#080a0b]"
+    <main className="mp-sans flex min-h-[320px] w-full items-start justify-center bg-[var(--mp-bg)] px-3 py-3 text-[var(--mp-text)]">
+      <section
+        aria-label="Market Pulse Android notification"
+        className="mx-auto w-full max-w-[420px] overflow-hidden rounded-[22px] border border-[#d7d8d1] bg-[#fbfbf8] shadow-[0_12px_30px_rgba(27,30,22,0.11)]"
       >
-        <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-[#b6dd38]/10 blur-3xl transition duration-500 group-hover:bg-[#b6dd38]/20" />
-        <div className="pointer-events-none absolute -bottom-24 left-20 h-40 w-56 rounded-full bg-[#365126]/20 blur-3xl" />
-
-        <header className="relative flex items-center justify-between">
+        <div className="flex items-center justify-between border-b border-[#e6e6e1] px-4 py-3">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-[var(--mp-lime)] text-[#10150d] shadow-[0_0_0_4px_rgba(201,246,74,.08)]">
-              <RadioTower size={16} strokeWidth={2.4} />
+            <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-[var(--mp-text)] text-[var(--mp-lime)]">
+              <Newspaper size={16} strokeWidth={2.4} />
             </span>
-            <div>
-              <p className="font-['Space_Grotesk'] text-[13px] font-bold leading-none tracking-[-0.02em]">Market Pulse</p>
-              <p className="mt-1 font-['IBM_Plex_Mono'] text-[8px] font-medium tracking-[0.12em] text-white/45">LIVE MARKET INTELLIGENCE</p>
+            <div className="leading-none">
+              <p className="text-[13px] font-semibold tracking-[-0.02em]">Market Pulse</p>
+              <p className="mt-1 text-[10px] text-[var(--mp-muted)]">Coinness · 방금 전</p>
             </div>
           </div>
-          <span className="flex items-center gap-1.5 font-['IBM_Plex_Mono'] text-[8px] font-semibold tracking-[0.12em] text-[var(--mp-lime)]">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--mp-lime)] opacity-50" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--mp-lime)]" />
-            </span>
-            LIVE
-          </span>
-        </header>
-
-        <div className="relative mt-5 flex items-center gap-2">
-          <div className="flex items-center gap-1.5 rounded-full border border-[#f0b267]/35 bg-[#f0b267]/10 px-2.5 py-1.5 text-[#ffc783]">
-            <BellRing size={12} strokeWidth={2.6} />
-            <span className="font-['IBM_Plex_Mono'] text-[10px] font-semibold tracking-[0.14em]">BREAKING</span>
+          <div className="flex items-center gap-2 text-[var(--mp-muted)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--mp-lime)]" aria-label="실시간 알림" />
+            <Bell size={15} strokeWidth={1.8} />
           </div>
-          <span className="font-['IBM_Plex_Mono'] text-[8px] tracking-[0.12em] text-white/40">2 MIN AGO · GLOBAL</span>
         </div>
 
-        <section className="relative mt-3 min-w-0">
-          <h1 className="font-['Space_Grotesk'] text-[23px] font-bold leading-[1.08] tracking-[-0.04em] text-white">
-            Spot ETF inflows hit<br />
-            <span className="text-[var(--mp-lime)]">a new daily high.</span>
-          </h1>
-          <p className="mt-2 max-w-[330px] truncate font-['IBM_Plex_Mono'] text-[10px] leading-relaxed text-white/55">
-            $1.18B entered BTC funds before the U.S. close.
-          </p>
-        </section>
-
-        <div className="relative mt-auto flex items-end justify-between gap-4">
-          <div>
-            <div className="flex items-baseline gap-2">
-              <span className="font-['IBM_Plex_Mono'] text-[10px] font-semibold tracking-[0.16em] text-white/55">BTC</span>
-              <span className="font-['Space_Grotesk'] text-[26px] font-bold leading-none tracking-[-0.05em]">$67,842</span>
-            </div>
-            <div className="mt-1.5 flex items-center gap-1.5">
-              <ArrowUpRight size={14} className="text-[var(--mp-lime)]" strokeWidth={2.6} />
-              <span className="font-['IBM_Plex_Mono'] text-[11px] font-semibold text-[var(--mp-lime)]">+5.72% today</span>
-            </div>
+        <button
+          type="button"
+          onClick={() => setOpened(true)}
+          aria-label="속보 기사 자세히 보기"
+          className="group w-full border-b border-[#e6e6e1] px-4 pb-3.5 pt-4 text-left outline-none transition-colors hover:bg-[#f5f6ed] focus-visible:bg-[#f5f6ed] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--mp-lime)]"
+        >
+          <div className="flex items-center gap-2">
+            <span className="rounded-[4px] bg-[var(--mp-red)] px-1.5 py-1 text-[9px] font-bold tracking-[0.02em] text-white">BREAKING</span>
+            <span className="text-[10px] text-[var(--mp-muted)]">암호화폐 · 주요 소식</span>
           </div>
-          <span className="flex shrink-0 items-center gap-1 rounded-full bg-[var(--mp-lime)] px-3 py-2 font-['IBM_Plex_Mono'] text-[9px] font-semibold tracking-[0.08em] text-[#10150d] transition group-hover:bg-[#dbff73]">
-            VIEW IMPACT <ChevronRight size={13} strokeWidth={2.8} />
-          </span>
-        </div>
-
-        <div className="relative mt-4 grid grid-cols-4 gap-2 border-t border-white/10 pt-3">
-          {assets.map((asset) => (
-            <div key={asset.symbol} className="min-w-0">
-              <p className="font-['IBM_Plex_Mono'] text-[8px] font-semibold tracking-[0.12em] text-white/45">{asset.symbol}</p>
-              <p className="mt-1 truncate font-['Space_Grotesk'] text-[12px] font-semibold text-white/90">{asset.price}</p>
-              <p className="mt-0.5 font-['IBM_Plex_Mono'] text-[8px] font-semibold text-[var(--mp-lime)]">{asset.move}</p>
+          <div className="mt-2.5 flex items-start gap-3">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-[17px] font-semibold leading-[1.42] tracking-[-0.045em]">
+                비트코인 현물 ETF, 3거래일 연속 순유입
+              </h1>
+              <p className="mt-1.5 text-[11px] leading-[1.45] text-[var(--mp-muted)]">
+                기관 수요가 이어지며 시장의 관심이 다시 비트코인으로 모이고 있습니다.
+              </p>
             </div>
-          ))}
-          <div className="absolute -top-[1px] left-0 h-px w-[31%] bg-[var(--mp-lime)]" />
-        </div>
+            <ChevronRight className="mt-1 shrink-0 text-[#a1a39b] transition-transform group-hover:translate-x-0.5" size={18} />
+          </div>
+        </button>
 
-        <footer className="relative mt-2 flex items-center justify-between font-['IBM_Plex_Mono'] text-[8px] tracking-[0.08em] text-white/35">
-          <span className="flex items-center gap-1"><Zap size={10} className="text-[#ffc783]" /> HIGH IMPACT · 94/100</span>
-          <span>Tap to open full brief</span>
-        </footer>
-      </button>
+        <div className="flex items-center justify-between px-3.5 py-2.5">
+          <button
+            type="button"
+            onClick={() => setOpened(true)}
+            className="flex min-h-8 items-center gap-1 rounded-[7px] px-2 text-[11px] font-medium text-[var(--mp-text)] outline-none hover:bg-[#eff1e6] focus-visible:ring-2 focus-visible:ring-[var(--mp-lime)]"
+          >
+            자세히 보기 <ChevronRight size={13} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setMuted((value) => !value)}
+            aria-pressed={muted}
+            className="flex min-h-8 items-center gap-1 rounded-[7px] px-2 text-[11px] text-[var(--mp-muted)] outline-none hover:bg-[#f0f0eb] focus-visible:ring-2 focus-visible:ring-[var(--mp-lime)]"
+          >
+            {muted ? <X size={13} /> : <Pause size={13} />}
+            {muted ? "알림 다시 켜기" : "1시간 동안 알림 끄기"}
+          </button>
+        </div>
+        {opened && (
+          <div role="status" className="border-t border-[#e6e6e1] bg-[#f5f6ed] px-4 py-2 text-[11px] text-[var(--mp-muted)]">
+            Coinness 원문을 열 준비가 되었어요.
+          </div>
+        )}
+      </section>
     </main>
   );
 }
