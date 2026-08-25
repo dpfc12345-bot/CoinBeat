@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { Screen } from '@/src/components/Screen';
@@ -46,9 +46,9 @@ export default function HomeScreen() {
     <SectionHeading label="주요 뉴스" action="전체 보기" onAction={() => router.push('/news')} />
     {mockNews.slice(1, 3).map((item) => <NewsRow key={item.id} item={item} />)}
     <SectionHeading label="시장 한눈에 보기" action="시장" onAction={() => router.push('/markets')} />
-    <View style={styles.horizontalScroll}>
-      <View style={styles.marketRow}>{snapshot.assets.slice(0, 2).map((asset) => <MarketCard key={asset.symbol} asset={asset} />)}</View>
-    </View>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll} contentContainerStyle={styles.marketRow}>
+      {snapshot.assets.slice(0, 4).map((asset) => <MarketCard key={asset.symbol} asset={asset} />)}
+    </ScrollView>
     <SectionHeading label="뉴스 영향도" />
     <ImpactWidget item={mockNews[0]} />
     <SectionHeading label="시장 심리" />
@@ -77,8 +77,8 @@ const styles = StyleSheet.create({
   heroTitle: { fontFamily: 'Inter_700Bold', fontSize: 22, lineHeight: 30, letterSpacing: -0.8, marginTop: 14 },
   heroFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 },
   heroSource: { fontFamily: 'Inter_500Medium', fontSize: 11 },
-  horizontalScroll: { marginRight: -18, overflow: 'hidden' },
-  marketRow: { flexDirection: 'row', paddingRight: 18 },
+  horizontalScroll: { marginRight: -18 },
+  marketRow: { paddingRight: 18 },
   marketTape: { marginTop: 26, paddingTop: 14, borderTopWidth: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 14, alignItems: 'center' },
   tapeLabel: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.3 },
   tapeValue: { fontFamily: 'Inter_600SemiBold', fontSize: 10 },

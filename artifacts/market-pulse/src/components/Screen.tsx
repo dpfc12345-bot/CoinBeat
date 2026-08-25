@@ -6,6 +6,6 @@ import { useColors } from '@/hooks/useColors';
 export function Screen({ children }: PropsWithChildren) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  return <ScrollView style={{ backgroundColor: colors.background }} contentContainerStyle={[styles.content, { paddingTop: insets.top + (Platform.OS === 'web' ? 67 : 16), paddingBottom: insets.bottom + 96 }]} showsVerticalScrollIndicator={false}><View>{children}</View></ScrollView>;
+  return <ScrollView style={{ backgroundColor: colors.background }} contentContainerStyle={[styles.content, { paddingTop: insets.top + 18, paddingBottom: insets.bottom + 96 }]} showsVerticalScrollIndicator={false}><View>{children}</View></ScrollView>;
 }
 const styles = StyleSheet.create({ content: { paddingHorizontal: 18 } });
