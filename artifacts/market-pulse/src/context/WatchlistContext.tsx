@@ -11,7 +11,14 @@ export function WatchlistProvider({ children }: PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then((stored) => {
-      if (stored) { try { setSymbols(JSON.parse(stored) as string[]); } catch { /* defaults are valid */ } }
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            setSymbols([...new Set(parsed.filter((symbol): symbol is string => typeof symbol === 'string' && symbol.length > 0))]);
+          }
+        } catch { /* defaults are valid */ }
+      }
       setIsLoading(false);
     });
   }, []);

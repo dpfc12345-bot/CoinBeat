@@ -5,11 +5,12 @@ import { router } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { Screen } from '@/src/components/Screen';
 import { ImpactWidget, MarketCard, NewsRow, ScreenHeader, SectionHeading, SentimentCard } from '@/src/components/MarketPulseUI';
-import { useGetMarketOverview, useGetNews } from '@workspace/api-client-react';
+import { getGetMarketOverviewQueryKey, useGetMarketOverview, useGetNews } from '@workspace/api-client-react';
+import { MARKET_REFRESH_INTERVAL_MS } from '@/src/config/api';
 
 export default function HomeScreen() {
   const colors = useColors();
-  const marketQuery = useGetMarketOverview();
+  const marketQuery = useGetMarketOverview({ request: { cache: 'no-store' }, query: { queryKey: getGetMarketOverviewQueryKey(), refetchInterval: MARKET_REFRESH_INTERVAL_MS, staleTime: MARKET_REFRESH_INTERVAL_MS - 2_000 } });
   const newsQuery = useGetNews();
   const snapshot = marketQuery.data;
   const news = newsQuery.data ?? [];
@@ -19,7 +20,7 @@ export default function HomeScreen() {
     <View style={styles.utilityRow}>
       <View style={[styles.status, { backgroundColor: colors.muted, borderColor: colors.border }]}>
         <View style={[styles.statusDot, { backgroundColor: colors.positive }]} />
-        <Text style={[styles.statusText, { color: colors.mutedForeground }]}>Upbit 실시간 · 30초마다 갱신</Text>
+       <Text style={[styles.statusText, { color: colors.mutedForeground }]}>Upbit 실시간 · 15초마다 갱신</Text>
       </View>
       <Pressable testID="widget-launcher" onPress={() => router.push('/widgets')} style={({ pressed }) => [styles.widgetButton, { borderColor: colors.border, backgroundColor: colors.secondary, opacity: pressed ? 0.72 : 1 }]}>
         <Ionicons name="grid-outline" size={14} color={colors.primary} />

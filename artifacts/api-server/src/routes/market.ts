@@ -27,6 +27,14 @@ const assetMetadata = [
   { symbol: "ADA", name: "에이다", market: "KRW-ADA", accent: "#7DB5FF" },
 ] as const;
 
+const fallbackAccents = ["#C9F64A", "#A7B1FF", "#70E1D2", "#FFB86B", "#D7C17A", "#7DB5FF", "#E8A8FF", "#85D4FF"];
+
+type UpbitMarket = {
+  market: string;
+  korean_name: string;
+  english_name: string;
+};
+
 type UpbitTicker = {
   market: string;
   trade_price: number;
@@ -35,8 +43,6 @@ type UpbitTicker = {
   high_price: number;
   low_price: number;
 };
-
-type UpbitCandle = { trade_price: number };
 
 type LiveAsset = {
   symbol: string;
@@ -68,6 +74,8 @@ type LiveNewsItem = {
 };
 
 let cachedAssets: { expiresAt: number; value: LiveAsset[] } | undefined;
+let assetRequestInFlight: Promise<LiveAsset[]> | undefined;
+let cachedMarkets: { expiresAt: number; value: UpbitMarket[] } | undefined;
 let cachedNews: { expiresAt: number; value: LiveNewsItem[] } | undefined;
 
 function formatKrw(value: number) {
@@ -85,37 +93,70 @@ function relativeTime(publishedAt: string) {
 
 async function getLiveAssets(): Promise<LiveAsset[]> {
   if (cachedAssets && cachedAssets.expiresAt > Date.now()) return cachedAssets.value;
+  if (!assetRequestInFlight) {
+    assetRequestInFlight = loadLiveAssets().finally(() => {
+      assetRequestInFlight = undefined;
+    });
+  }
+  return assetRequestInFlight;
+}
 
-  const markets = assetMetadata.map((asset) => asset.market).join(",");
-  const tickerResponse = await fetch(`https://api.upbit.com/v1/ticker?markets=${encodeURIComponent(markets)}`);
-  if (!tickerResponse.ok) throw new Error(`Upbit 시세를 불러오지 못했습니다 (${tickerResponse.status}).`);
-  const tickers = await tickerResponse.json() as UpbitTicker[];
+async function loadLiveAssets(): Promise<LiveAsset[]> {
+  const marketResponse = cachedMarkets && cachedMarkets.expiresAt > Date.now()
+    ? undefined
+    : await fetch("https://api.upbit.com/v1/market/all?isDetails=false");
+  if (marketResponse && !marketResponse.ok) {
+    throw new Error(`Upbit 마켓 목록을 불러오지 못했습니다 (${marketResponse.status}).`);
+  }
+  const markets = cachedMarkets && cachedMarkets.expiresAt > Date.now()
+    ? cachedMarkets.value
+    : (await marketResponse!.json() as UpbitMarket[]).filter((market) => market.market.startsWith("KRW-"));
+  if (markets.length === 0) throw new Error("Upbit KRW 마켓이 없습니다.");
+  cachedMarkets = { value: markets, expiresAt: Date.now() + 24 * 60 * 60 * 1000 };
+
+  const marketChunks = Array.from({ length: Math.ceil(markets.length / 100) }, (_, index) => markets.slice(index * 100, (index + 1) * 100));
+  const tickerChunks = await Promise.all(marketChunks.map(async (marketChunk) => {
+    const marketList = marketChunk.map((market) => market.market).join(",");
+    const tickerResponse = await fetch(`https://api.upbit.com/v1/ticker?markets=${encodeURIComponent(marketList)}`);
+    if (!tickerResponse.ok) throw new Error(`Upbit 시세를 불러오지 못했습니다 (${tickerResponse.status}).`);
+    return tickerResponse.json() as Promise<UpbitTicker[]>;
+  }));
+  const tickers = tickerChunks.flat();
 
   const tickersByMarket = new Map(tickers.map((ticker) => [ticker.market, ticker]));
-  const candleData = await Promise.all(assetMetadata.map(async (asset) => {
-    const response = await fetch(`https://api.upbit.com/v1/candles/minutes/60?market=${asset.market}&count=12`);
-    if (!response.ok) throw new Error(`Upbit 차트 데이터를 불러오지 못했습니다 (${response.status}).`);
-    const candles = await response.json() as UpbitCandle[];
-    return [asset.market, candles.reverse().map((candle) => candle.trade_price)] as const;
-  }));
-  const candleByMarket = new Map(candleData);
+  const knownAccents: Record<string, string> = Object.fromEntries(assetMetadata.map((asset) => [asset.symbol, asset.accent]));
+  const accentFor = (symbol: string) => {
+    const knownAccent = knownAccents[symbol];
+    if (knownAccent) return knownAccent;
+    const hash = [...symbol].reduce((total, character) => total + character.charCodeAt(0), 0);
+    return fallbackAccents[hash % fallbackAccents.length];
+  };
 
-  const value = assetMetadata.map((metadata) => {
-    const ticker = tickersByMarket.get(metadata.market);
-    if (!ticker) throw new Error(`${metadata.symbol} 시세가 Upbit 응답에 없습니다.`);
-    return {
-      symbol: metadata.symbol,
-      name: metadata.name,
-      price: ticker.trade_price,
-      change24h: Number((ticker.signed_change_rate * 100).toFixed(2)),
-      volume24h: formatKrw(ticker.acc_trade_price_24h),
-      marketCap: "Upbit 미제공",
-      high24h: ticker.high_price,
-      low24h: ticker.low_price,
-      sparkline: candleByMarket.get(metadata.market) ?? [ticker.trade_price],
-      accent: metadata.accent,
-    };
-  });
+  const value = markets
+    .map((market) => {
+      const ticker = tickersByMarket.get(market.market);
+      if (!ticker) return null;
+      const symbol = market.market.slice(4);
+      const name = market.korean_name || market.english_name || symbol;
+      return {
+        symbol,
+        name,
+        price: ticker.trade_price,
+        change24h: Number((ticker.signed_change_rate * 100).toFixed(2)),
+        volume24h: formatKrw(ticker.acc_trade_price_24h),
+        marketCap: "Upbit 미제공",
+        high24h: ticker.high_price,
+        low24h: ticker.low_price,
+        // The ticker endpoint is enough for the fast overview. A two-point
+        // sparkline keeps existing cards valid without one candle request per coin.
+        sparkline: [ticker.trade_price, ticker.trade_price],
+        accent: accentFor(symbol),
+        volume: ticker.acc_trade_price_24h,
+      };
+    })
+    .filter((asset): asset is LiveAsset & { volume: number } => Boolean(asset))
+    .sort((first, second) => second.volume - first.volume)
+    .map(({ volume: _volume, ...asset }) => asset);
   cachedAssets = { value, expiresAt: Date.now() + 15_000 };
   return value;
 }

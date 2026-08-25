@@ -18,8 +18,8 @@ import { setBaseUrl } from '@workspace/api-client-react';
 import { WatchlistProvider } from '@/src/context/WatchlistContext';
 import { WidgetPreferencesProvider } from '@/src/context/WidgetPreferencesContext';
 import { refreshAndroidWidgets } from '@/src/widgets/refresh';
-import { getApiBaseUrl } from '@/src/config/api';
-import { isLiveNotificationEnabled, refreshLiveNotification } from '@/src/notifications/liveNotification';
+import { getApiBaseUrl, MARKET_REFRESH_INTERVAL_MS } from '@/src/config/api';
+import { LIVE_NOTIFICATION_REFRESH_INTERVAL_MS, isLiveNotificationEnabled, refreshLiveNotification } from '@/src/notifications/liveNotification';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -55,26 +55,34 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (Platform.OS !== 'android') return;
-    const sync = async () => {
-      try {
-        if (await isLiveNotificationEnabled()) await refreshLiveNotification();
-      } catch {
-        // A notification update must not block the home-screen widget refresh.
-      }
+    const syncWidgets = async () => {
       try {
         await refreshAndroidWidgets();
       } catch {
         // The widget may not be installed yet, or Android may still be starting it.
       }
     };
-    void sync();
+    const syncLiveNotification = async () => {
+      try {
+        if (await isLiveNotificationEnabled()) await refreshLiveNotification();
+      } catch {
+        // Keep the last notification visible if the latest refresh fails.
+      }
+    };
+    void syncWidgets();
+    void syncLiveNotification();
     const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active') void sync();
+      if (state === 'active') {
+        void syncWidgets();
+        void syncLiveNotification();
+      }
     });
-    const interval = setInterval(() => void sync(), 15 * 60 * 1000);
+    const widgetInterval = setInterval(() => void syncWidgets(), MARKET_REFRESH_INTERVAL_MS);
+    const notificationInterval = setInterval(() => void syncLiveNotification(), LIVE_NOTIFICATION_REFRESH_INTERVAL_MS);
     return () => {
       subscription.remove();
-      clearInterval(interval);
+      clearInterval(widgetInterval);
+      clearInterval(notificationInterval);
     };
   }, []);
 

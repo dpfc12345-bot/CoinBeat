@@ -1,12 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
-import { useGetMarketOverview, useGetNews, type NewsItem as ApiNewsItem } from '@workspace/api-client-react';
+import { getGetMarketOverviewQueryKey, useGetMarketOverview, useGetNews, type NewsItem as ApiNewsItem } from '@workspace/api-client-react';
 import { Screen } from '@/src/components/Screen';
 import { useColors } from '@/hooks/useColors';
 import { MarketAsset } from '@/src/models';
 import { useWidgetPreferences } from '@/src/context/WidgetPreferencesContext';
+import { MARKET_REFRESH_INTERVAL_MS } from '@/src/config/api';
 
 type WidgetKind = 'price' | 'news';
 type WidgetSize = 'small' | 'medium' | 'large';
@@ -18,17 +19,33 @@ export default function WidgetsScreen() {
   const [saved, setSaved] = useState(false);
   const [previewKind, setPreviewKind] = useState<WidgetKind>('price');
   const [previewSize, setPreviewSize] = useState<WidgetSize>('medium');
+  const [coinSearch, setCoinSearch] = useState('');
   const { preferences, isLoading: preferencesLoading, savePreferences } = useWidgetPreferences();
   const kind = previewKind;
   const size = previewSize;
   const selectedSymbols = preferences.selectedSymbols;
-  const marketQuery = useGetMarketOverview();
-  const allAssets = useMemo(() => {
-    const preferredOrder = ['BTC', 'ETH', 'SOL', 'XRP'];
-    const assets = marketQuery.data?.assets ?? [];
-    return preferredOrder.map((symbol) => assets.find((asset) => asset.symbol === symbol)).filter((asset): asset is MarketAsset => Boolean(asset));
-  }, [marketQuery.data?.assets]);
-  const selectedAssets = allAssets.filter((asset) => selectedSymbols.includes(asset.symbol));
+  const marketQuery = useGetMarketOverview({
+    request: { cache: 'no-store' },
+    query: {
+      queryKey: getGetMarketOverviewQueryKey(),
+      refetchInterval: MARKET_REFRESH_INTERVAL_MS,
+      staleTime: MARKET_REFRESH_INTERVAL_MS - 2_000,
+    },
+  });
+  const allAssets = marketQuery.data?.assets ?? [];
+  const coinOptions = useMemo(() => {
+    const normalizedSearch = coinSearch.trim().toLowerCase();
+    const matches = normalizedSearch
+      ? allAssets.filter((asset) => `${asset.symbol} ${asset.name}`.toLowerCase().includes(normalizedSearch))
+      : allAssets;
+    return matches.slice(0, 36);
+  }, [allAssets, coinSearch]);
+  const selectedAssets = useMemo(() => {
+    const assetsBySymbol = new Map(allAssets.map((asset) => [asset.symbol, asset]));
+    return selectedSymbols
+      .map((symbol) => assetsBySymbol.get(symbol))
+      .filter((asset): asset is MarketAsset => Boolean(asset));
+  }, [allAssets, selectedSymbols]);
   const newsQuery = useGetNews();
 
   const changeKind = (nextKind: WidgetKind) => {
@@ -44,8 +61,8 @@ export default function WidgetsScreen() {
   };
 
   const selectedLabel = selectedAssets.length === 1
-    ? `${selectedAssets[0].name} 가격`
-    : `${selectedAssets.length}개 코인 가격`;
+    ? `${selectedAssets[0]?.name ?? selectedSymbols[0]} 가격`
+    : `${selectedSymbols.length}개 코인 가격`;
 
   return <Screen>
     <View style={styles.header}>
@@ -67,8 +84,22 @@ export default function WidgetsScreen() {
 
     {kind === 'price' && <>
       <Text style={[styles.label, { color: colors.mutedForeground }]}>가격 위젯에 표시할 코인</Text>
+      <View style={[styles.searchBox, { borderColor: colors.border, backgroundColor: colors.card }]}>
+        <Ionicons name="search" size={17} color={colors.mutedForeground} />
+        <TextInput
+          testID="widget-coin-search"
+          value={coinSearch}
+          onChangeText={setCoinSearch}
+          placeholder="코인 이름 또는 심볼 검색"
+          placeholderTextColor={colors.mutedForeground}
+          autoCapitalize="characters"
+          style={[styles.searchInput, { color: colors.foreground }]}
+        />
+        {coinSearch.length > 0 && <Pressable testID="widget-coin-search-clear" onPress={() => setCoinSearch('')} hitSlop={8}><Ionicons name="close-circle" size={17} color={colors.mutedForeground} /></Pressable>}
+      </View>
+      <Text style={[styles.coinHint, { color: colors.mutedForeground }]}>선택 {selectedSymbols.length}개 · 작은 위젯은 2개, 중간은 4개, 큰 위젯은 최대 8개를 표시합니다.</Text>
       <View style={styles.coinPicker}>
-        {allAssets.map((asset) => {
+        {coinOptions.map((asset) => {
           const selected = selectedSymbols.includes(asset.symbol);
           return <Pressable
             key={asset.symbol}
@@ -82,6 +113,8 @@ export default function WidgetsScreen() {
           </Pressable>;
         })}
       </View>
+      {marketQuery.isError && <Text style={[styles.noResults, { color: colors.negative }]}>전체 코인 목록을 불러오지 못했습니다. 잠시 후 다시 시도하세요.</Text>}
+      {!marketQuery.isLoading && !marketQuery.isError && coinOptions.length === 0 && <Text style={[styles.noResults, { color: colors.mutedForeground }]}>일치하는 코인이 없습니다.</Text>}
     </>}
 
     <Text style={[styles.label, { color: colors.mutedForeground }]}>미리보기 크기</Text>
@@ -110,7 +143,7 @@ export default function WidgetsScreen() {
       <Ionicons name={saved ? 'checkmark' : 'add'} size={18} color={colors.primaryForeground} />
       <Text style={[styles.saveText, { color: colors.primaryForeground }]}>{saved ? '홈 화면 위젯을 새로고침했어요' : '홈 화면 위젯 새로고침'}</Text>
     </Pressable>
-    {saved && <Text style={[styles.savedNote, { color: colors.positive }]}>홈 화면을 길게 누른 뒤 위젯에서 Market Pulse를 선택해 추가하세요. 가격 위젯은 선택 코인을 반영하며, Android는 최소 30분마다 자동 갱신됩니다.</Text>}
+    {saved && <Text style={[styles.savedNote, { color: colors.positive }]}>홈 화면을 길게 누른 뒤 위젯에서 Market Pulse를 선택해 추가하세요. 앱이 열려 있을 때는 15초마다 갱신되며, Android의 백그라운드 자동 갱신은 최소 30분입니다.</Text>}
   </Screen>;
 }
 
@@ -125,6 +158,7 @@ function Segment({ icon, label, active, onPress }: { icon: keyof typeof Ionicons
 
 function PriceWidget({ assets, size }: { assets: MarketAsset[]; size: WidgetSize }) {
   const colors = useColors();
+  const visibleAssets = assets.slice(0, size === 'small' ? 2 : size === 'medium' ? 4 : 8);
   return <View style={[styles.widgetCard, widgetSizes[size], { backgroundColor: colors.card, borderColor: colors.primary }]}>
     <View style={styles.widgetTop}>
       <View style={styles.assetLine}>
@@ -134,12 +168,12 @@ function PriceWidget({ assets, size }: { assets: MarketAsset[]; size: WidgetSize
       <Text style={[styles.liveText, { color: colors.positive }]}>● 거래중</Text>
     </View>
     <View style={styles.priceGrid}>
-      {assets.map((asset) => <View key={asset.symbol} style={[styles.priceCell, { borderColor: colors.border }]}>
+       {visibleAssets.map((asset) => <View key={asset.symbol} style={[styles.priceCell, { borderColor: colors.border }]}>
         <View style={styles.priceCellTop}><Text style={[styles.priceSymbol, { color: colors.foreground }]}>{asset.symbol}</Text><Text style={[styles.priceChange, { color: asset.change24h >= 0 ? colors.positive : colors.negative }]}>{asset.change24h >= 0 ? '+' : ''}{asset.change24h.toFixed(2)}%</Text></View>
         <Text numberOfLines={1} style={[styles.widgetPrice, { color: colors.foreground }]}>{formatKrwPrice(asset.price)}</Text>
       </View>)}
     </View>
-    {size === 'large' && <View style={[styles.priceFooter, { borderTopColor: colors.border }]}><Text style={[styles.footerMetric, { color: colors.mutedForeground }]}>선택 코인 <Text style={{ color: colors.foreground }}>{assets.length}개</Text></Text><Text style={[styles.footerMetric, { color: colors.mutedForeground }]}>업데이트 <Text style={{ color: colors.foreground }}>방금 전</Text></Text></View>}
+     {size === 'large' && <View style={[styles.priceFooter, { borderTopColor: colors.border }]}><Text style={[styles.footerMetric, { color: colors.mutedForeground }]}>선택 코인 <Text style={{ color: colors.foreground }}>{assets.length}개</Text></Text><Text style={[styles.footerMetric, { color: colors.mutedForeground }]}>업데이트 <Text style={{ color: colors.foreground }}>방금 전</Text></Text></View>}
   </View>;
 }
 
@@ -192,6 +226,10 @@ const styles = StyleSheet.create({
   coinChip: { minWidth: 74, minHeight: 38, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1, borderRadius: 12, paddingHorizontal: 10 },
   coinDot: { width: 7, height: 7, borderRadius: 4 },
   coinChipText: { fontFamily: 'Inter_700Bold', fontSize: 12 },
+  searchBox: { minHeight: 47, flexDirection: 'row', alignItems: 'center', gap: 9, borderWidth: 1, borderRadius: 13, paddingHorizontal: 13, marginBottom: 8 },
+  searchInput: { flex: 1, fontFamily: 'Inter_500Medium', fontSize: 13, paddingVertical: 10 },
+  coinHint: { fontFamily: 'Inter_500Medium', fontSize: 10, lineHeight: 15, marginBottom: 10 },
+  noResults: { fontFamily: 'Inter_500Medium', fontSize: 12, marginTop: -14, marginBottom: 24 },
   sizeRow: { flexDirection: 'row', gap: 8, marginBottom: 24 },
   sizeControl: { flex: 1, alignItems: 'center', borderWidth: 1, borderRadius: 13, paddingVertical: 10 },
   sizeText: { fontFamily: 'Inter_700Bold', fontSize: 12 },

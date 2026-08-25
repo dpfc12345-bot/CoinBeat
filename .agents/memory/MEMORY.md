@@ -1,3 +1,5 @@
 - [OpenAPI Zod integer compatibility](openapi-zod-integer.md) — Numeric score schemas use OpenAPI `number`; `integer` generates an unavailable Zod helper here.
 - [News-first widget direction](news-first-widget-direction.md) — Market Pulse widgets prioritize Coinness headlines over price dashboards, using restrained Korean editorial UI.
 - [Expo Router widget initialization](expo-router-widget-initialization.md) — Register Android widget headless tasks before loading Expo Router or widgets can remain blank.
+- [Development API routing](development-api-routing.md) — Expo development builds must prefer the Replit dev API over a configured production URL.
+- [Live notification cadence](live-notification-cadence.md) — Keep persistent market notifications quiet and slower than foreground market refreshes.

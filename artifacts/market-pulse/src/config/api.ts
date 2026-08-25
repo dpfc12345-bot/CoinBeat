@@ -1,8 +1,12 @@
+export const MARKET_REFRESH_INTERVAL_MS = 15_000;
+
 export function getApiBaseUrl() {
+  const developmentDomain = process.env.EXPO_PUBLIC_DOMAIN?.trim();
+  if (__DEV__ && developmentDomain) return `https://${developmentDomain}`;
+
   const configuredUrl = process.env.EXPO_PUBLIC_API_URL?.trim();
   if (configuredUrl) return configuredUrl.replace(/\/+$/, '');
 
-  const developmentDomain = process.env.EXPO_PUBLIC_DOMAIN?.trim();
   return developmentDomain ? `https://${developmentDomain}` : '';
 }
 

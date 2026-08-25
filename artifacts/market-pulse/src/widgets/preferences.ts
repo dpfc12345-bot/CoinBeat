@@ -25,7 +25,7 @@ export async function loadWidgetPreferences(): Promise<WidgetPreferences> {
       kind: parsed.kind === 'news' ? 'news' : 'price',
       size: parsed.size === 'small' || parsed.size === 'large' ? parsed.size : 'medium',
       selectedSymbols: Array.isArray(parsed.selectedSymbols) && parsed.selectedSymbols.length > 0
-        ? parsed.selectedSymbols.filter((symbol): symbol is string => typeof symbol === 'string')
+        ? [...new Set(parsed.selectedSymbols.filter((symbol): symbol is string => typeof symbol === 'string' && symbol.length > 0))]
         : defaultWidgetPreferences.selectedSymbols,
     };
   } catch {

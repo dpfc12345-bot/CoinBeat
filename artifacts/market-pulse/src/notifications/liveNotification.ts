@@ -10,11 +10,14 @@ import { getApiUrl } from '@/src/config/api';
 const ENABLED_KEY = 'market-pulse-live-notification-enabled';
 const CHANNEL_ID = 'market-pulse-live';
 const NOTIFICATION_KIND = 'market-pulse-live';
+export const LIVE_NOTIFICATION_REFRESH_INTERVAL_MS = 60_000;
 
 if (Platform.OS === 'android') {
   Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowBanner: true,
+    handleNotification: async (notification) => ({
+      // This notification is replaced periodically. Keep it in the shade
+      // without repeatedly interrupting the user with heads-up banners.
+      shouldShowBanner: notification.request.content.data?.kind !== NOTIFICATION_KIND,
       shouldShowList: true,
       shouldPlaySound: false,
       shouldSetBadge: false,
@@ -70,7 +73,7 @@ async function getLiveCopy() {
     getJson<MarketData>('/api/market/overview'),
     getJson<NewsData>('/api/news'),
   ]);
-  const tracked = market.assets.filter((asset) => ['BTC', 'ETH'].includes(asset.symbol));
+  const tracked = market.assets.filter((asset) => ['BTC', 'ETH', 'SOL'].includes(asset.symbol));
   const prices = tracked
     .map((asset) => `${asset.symbol} ${formatPrice(asset.price)} ${asset.change24h >= 0 ? '+' : ''}${asset.change24h.toFixed(2)}%`)
     .join('  ·  ');

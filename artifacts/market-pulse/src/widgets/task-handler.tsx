@@ -9,7 +9,10 @@ import { FlexWidget, TextWidget } from 'react-native-android-widget';
 
 async function renderPriceWidget(widgetInfo: WidgetInfo) {
   const [assets, preferences] = await Promise.all([getPriceWidgetData(), loadWidgetPreferences()]);
-  const selectedAssets = assets.filter((asset) => preferences.selectedSymbols.includes(asset.symbol));
+  const assetsBySymbol = new Map(assets.map((asset) => [asset.symbol, asset]));
+  const selectedAssets = preferences.selectedSymbols
+    .map((symbol) => assetsBySymbol.get(symbol))
+    .filter((asset): asset is NonNullable<typeof asset> => Boolean(asset));
   if (assets.length === 0) throw new Error('표시할 가격 정보가 없습니다.');
   return <MarketPriceWidget assets={selectedAssets.length > 0 ? selectedAssets : assets.slice(0, 4)} widgetInfo={widgetInfo} />;
 }
