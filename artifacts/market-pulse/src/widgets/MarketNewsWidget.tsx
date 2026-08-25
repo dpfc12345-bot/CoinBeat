@@ -14,13 +14,13 @@ export function MarketNewsWidget({ items, widgetInfo }: { items: WidgetNews[]; w
     >
       <FlexWidget style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <TextWidget text="MARKET PULSE NEWS" style={{ color: widgetTheme.foreground, fontSize: 13, fontWeight: '700' }} />
-        <TextWidget text="CryptoPanic" style={{ color: widgetTheme.primary, fontSize: 10, fontWeight: '700' }} />
+        <TextWidget text="블록미디어 RSS" style={{ color: widgetTheme.primary, fontSize: 10, fontWeight: '700' }} />
       </FlexWidget>
       {items.slice(0, count).map((item) => (
         <FlexWidget
           key={item.id}
           clickAction="OPEN_URI"
-          clickActionData={{ uri: `market-pulse://news/${item.id}` }}
+          clickActionData={{ uri: item.sourceUrl }}
           accessibilityLabel={`${item.title} 상세 보기`}
           style={{ borderBottomWidth: 1, borderBottomColor: widgetTheme.border, paddingBottom: 7, flexDirection: 'column', flexGap: 3 }}
         >
@@ -31,7 +31,7 @@ export function MarketNewsWidget({ items, widgetInfo }: { items: WidgetNews[]; w
           <TextWidget text={item.title} maxLines={2} truncate="END" style={{ color: widgetTheme.foreground, fontSize: 13, fontWeight: '700', lineHeight: 17 }} />
         </FlexWidget>
       ))}
-      <TextWidget text="헤드라인을 탭하여 상세 보기" style={{ color: widgetTheme.muted, fontSize: 10 }} />
+      <TextWidget text="헤드라인을 탭하여 블록미디어 원문 열기" style={{ color: widgetTheme.muted, fontSize: 10 }} />
     </FlexWidget>
   );
 }

@@ -12,6 +12,7 @@ export interface NewsItem {
   title: string;
   content: string;
   source: string;
+  sourceUrl: string;
   publishedAt: Date;
   relativeTime: string;
   categories: string[];

@@ -15,7 +15,7 @@ export default function HomeScreen() {
   const news = newsQuery.data ?? [];
   const leadNews = news[0];
   return <Screen>
-    <ScreenHeader eyebrow="COINNESS MARKET BRIEFING" title="Market Pulse" onPress={() => router.push('/settings')} />
+    <ScreenHeader eyebrow="UPBIT · 블록미디어" title="Market Pulse" onPress={() => router.push('/settings')} />
     <View style={styles.utilityRow}>
       <View style={[styles.status, { backgroundColor: colors.muted, borderColor: colors.border }]}>
         <View style={[styles.statusDot, { backgroundColor: colors.positive }]} />

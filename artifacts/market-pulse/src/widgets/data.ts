@@ -10,6 +10,7 @@ export type WidgetAsset = {
 export type WidgetNews = {
   id: string;
   title: string;
+  sourceUrl: string;
   relativeTime: string;
   relatedSymbols: string[];
   importance: 'breaking' | 'high' | 'standard';
@@ -23,10 +24,11 @@ async function getJson<T>(path: string): Promise<T> {
   throw new Error(payload?.message ?? `데이터 요청에 실패했습니다 (${response.status}).`);
 }
 
-export async function getWidgetData() {
-  const [market, news] = await Promise.all([
-    getJson<{ assets: WidgetAsset[] }>('/api/market/overview'),
-    getJson<WidgetNews[]>('/api/news'),
-  ]);
-  return { assets: market.assets, news };
+export async function getPriceWidgetData() {
+  const market = await getJson<{ assets: WidgetAsset[] }>('/api/market/overview');
+  return market.assets;
+}
+
+export async function getNewsWidgetData() {
+  return getJson<WidgetNews[]>('/api/news');
 }

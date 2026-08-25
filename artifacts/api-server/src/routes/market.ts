@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { createHash } from "node:crypto";
 import {
   GetBreakingNewsResponse,
   GetMarketAssetParams,
@@ -37,17 +38,6 @@ type UpbitTicker = {
 
 type UpbitCandle = { trade_price: number };
 
-type CryptoPanicPost = {
-  id: string | number;
-  title: string;
-  published_at: string;
-  domain?: string;
-  source?: { title?: string };
-  kind?: string;
-  currencies?: Array<{ code?: string }>;
-  votes?: { important?: number; positive?: number; negative?: number };
-};
-
 type LiveAsset = {
   symbol: string;
   name: string;
@@ -66,6 +56,7 @@ type LiveNewsItem = {
   title: string;
   content: string;
   source: string;
+  sourceUrl: string;
   publishedAt: string;
   relativeTime: string;
   categories: string[];
@@ -131,29 +122,59 @@ async function getLiveAssets(): Promise<LiveAsset[]> {
 
 async function getLiveNews(): Promise<LiveNewsItem[]> {
   if (cachedNews && cachedNews.expiresAt > Date.now()) return cachedNews.value;
-  const token = process.env.CRYPTOPANIC_API_KEY;
-  if (!token) throw new Error("CryptoPanic 뉴스 키가 아직 설정되지 않았습니다.");
 
-  const response = await fetch(`https://cryptopanic.com/api/developer/v2/posts/?auth_token=${encodeURIComponent(token)}&public=true&kind=news&filter=hot`);
-  if (!response.ok) throw new Error(`CryptoPanic 뉴스를 불러오지 못했습니다 (${response.status}).`);
-  const payload = await response.json() as { results?: CryptoPanicPost[] };
-  if (!Array.isArray(payload.results)) throw new Error("CryptoPanic 뉴스 응답 형식이 올바르지 않습니다.");
+  const response = await fetch("https://www.blockmedia.co.kr/feed", {
+    headers: { Accept: "application/rss+xml, application/xml, text/xml" },
+  });
+  if (!response.ok) throw new Error(`블록미디어 뉴스를 불러오지 못했습니다 (${response.status}).`);
+  const xml = await response.text();
+  const itemBlocks = [...xml.matchAll(/<item\b[^>]*>([\s\S]*?)<\/item>/gi)].map((match) => match[1]);
+  if (itemBlocks.length === 0) throw new Error("블록미디어 RSS 응답에 뉴스가 없습니다.");
 
-  const value = payload.results.slice(0, 20).map((post) => {
-    const voteScore = Math.max(0, post.votes?.important ?? 0) + Math.max(0, post.votes?.positive ?? 0) - Math.max(0, post.votes?.negative ?? 0);
-    const importance: LiveNewsItem["importance"] = voteScore >= 20 ? "breaking" : voteScore >= 5 ? "high" : "standard";
+  const extractTag = (block: string, tag: string) => {
+    const match = block.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, "i"));
+    return decodeXml(match?.[1] ?? "");
+  };
+  const decodeXml = (value: string) => value
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, "\"")
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\s+/g, " ")
+    .trim();
+  const relatedSymbols = (text: string) => {
+    const symbols = [
+      ["비트코인", "BTC"], ["bitcoin", "BTC"], ["이더리움", "ETH"], ["ethereum", "ETH"],
+      ["솔라나", "SOL"], ["solana", "SOL"], ["리플", "XRP"], ["xrp", "XRP"],
+      ["도지코인", "DOGE"], ["dogecoin", "DOGE"], ["에이다", "ADA"], ["cardano", "ADA"],
+    ];
+    return [...new Set(symbols.filter(([keyword]) => text.toLowerCase().includes(keyword)).map(([, symbol]) => symbol))];
+  };
+
+  const value: LiveNewsItem[] = itemBlocks.slice(0, 20).map((block, index) => {
+    const title = extractTag(block, "title");
+    const link = extractTag(block, "link");
+    if (!link) throw new Error("블록미디어 RSS 기사 링크가 없습니다.");
+    const publishedAt = extractTag(block, "pubDate") || new Date().toISOString();
+    const description = extractTag(block, "description") || title;
+    const symbols = relatedSymbols(`${title} ${description}`);
     return {
-      id: String(post.id),
-      title: post.title,
-      content: post.title,
-      source: post.source?.title ?? post.domain ?? "CryptoPanic",
-      publishedAt: post.published_at,
-      relativeTime: relativeTime(post.published_at),
-      categories: [post.kind?.toUpperCase() === "NEWS" ? "MARKET" : (post.kind?.toUpperCase() ?? "MARKET")],
-      relatedSymbols: post.currencies?.map((currency) => currency.code?.toUpperCase()).filter((symbol): symbol is string => Boolean(symbol)).slice(0, 4) ?? [],
-      importance,
+      id: `blockmedia-${createHash("sha256").update(link).digest("base64url").slice(0, 20)}`,
+      title,
+      content: description,
+      source: "블록미디어",
+      sourceUrl: link,
+      publishedAt: new Date(publishedAt).toISOString(),
+      relativeTime: relativeTime(publishedAt),
+      categories: [title.includes("시장") || title.includes("가격") ? "MARKET" : "NEWS"],
+      relatedSymbols: symbols,
+      importance: (index === 0 ? "breaking" : index < 4 ? "high" : "standard") as LiveNewsItem["importance"],
       priceChange: 0,
-      impactScore: Math.min(100, Math.max(0, 50 + voteScore)),
+      impactScore: 0,
       volumeChange: 0,
     };
   });
@@ -163,8 +184,7 @@ async function getLiveNews(): Promise<LiveNewsItem[]> {
 
 function sendExternalDataError(res: Parameters<Parameters<IRouter["get"]>[1]>[1], error: unknown) {
   const message = error instanceof Error ? error.message : "외부 시장 데이터를 불러오지 못했습니다.";
-  const status = message.includes("키가 아직") ? 503 : 502;
-  res.status(status).json({ message });
+  res.status(502).json({ message });
 }
 
 router.get("/news", async (_req, res): Promise<void> => {

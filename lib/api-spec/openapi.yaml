@@ -196,6 +196,7 @@ components:
         title: { type: string }
         content: { type: string }
         source: { type: string }
+        sourceUrl: { type: string }
         publishedAt: { type: string, format: date-time }
         relativeTime: { type: string }
         categories:
@@ -208,7 +209,7 @@ components:
         priceChange: { type: number }
         impactScore: { type: number }
         volumeChange: { type: number }
-      required: [id, title, content, source, publishedAt, relativeTime, categories, relatedSymbols, importance, priceChange, impactScore, volumeChange]
+      required: [id, title, content, source, sourceUrl, publishedAt, relativeTime, categories, relatedSymbols, importance, priceChange, impactScore, volumeChange]
     MarketAsset:
       type: object
       properties:

@@ -51,7 +51,7 @@
             {
               "name": "MarketNews",
               "label": "Market Pulse 뉴스",
-              "description": "최신 CryptoPanic 암호화폐 헤드라인",
+              "description": "블록미디어 RSS 최신 암호화폐 헤드라인",
               "minWidth": "160dp",
               "minHeight": "150dp",
               "targetCellWidth": 2,

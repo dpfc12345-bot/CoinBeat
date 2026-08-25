@@ -3,9 +3,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useGetNewsById } from '@workspace/api-client-react';
+import { useGetMarketAsset, useGetNewsById } from '@workspace/api-client-react';
 import { useColors } from '@/hooks/useColors';
-import { getAsset } from '@/src/data/mockData';
 import { formatCategory, formatPercent, formatPrice, Sparkline, WatchlistToggle } from '@/src/components/MarketPulseUI';
 
 export default function NewsDetailScreen() {
@@ -13,6 +12,7 @@ export default function NewsDetailScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const newsQuery = useGetNewsById(id ?? '');
+  const assetQuery = useGetMarketAsset(newsQuery.data?.relatedSymbols[0] ?? 'BTC');
   const contentStyle = [styles.content, { paddingTop: insets.top + 14, paddingBottom: insets.bottom + 40 }];
 
   if (newsQuery.isLoading) {
@@ -30,7 +30,7 @@ export default function NewsDetailScreen() {
   }
 
   const item = newsQuery.data;
-  const asset = getAsset(item.relatedSymbols[0] ?? 'BTC');
+  const asset = assetQuery.data;
   const changeColor = item.priceChange >= 0 ? colors.positive : colors.negative;
 
   return <ScrollView style={{ backgroundColor: colors.background }} contentContainerStyle={contentStyle}>
@@ -39,7 +39,7 @@ export default function NewsDetailScreen() {
     <Text style={[styles.time, { color: colors.mutedForeground }]}>{item.relativeTime} · {item.source}</Text>
     <Text style={[styles.title, { color: colors.foreground }]}>{item.title}</Text>
     <Text style={[styles.body, { color: colors.secondaryForeground }]}>{item.content}</Text>
-    <View style={[styles.reaction, { borderColor: colors.border, backgroundColor: colors.card }]}>
+    {asset ? <View style={[styles.reaction, { borderColor: colors.border, backgroundColor: colors.card }]}>
       <View style={styles.reactionHead}>
         <View>
           <Text style={[styles.kicker, { color: colors.mutedForeground }]}>시장 반응</Text>
@@ -53,7 +53,7 @@ export default function NewsDetailScreen() {
         <Reaction label="현재" value={formatPrice(asset.price)} change={item.priceChange} color={changeColor} />
       </View>
       <Sparkline points={asset.sparkline} color={changeColor} width={300} height={80} />
-    </View>
+    </View> : <View style={[styles.reaction, { borderColor: colors.border, backgroundColor: colors.card }]}><Text style={[styles.kicker, { color: colors.mutedForeground }]}>시장 반응</Text><Text style={[styles.stateCopy, { color: assetQuery.isError ? colors.negative : colors.mutedForeground }]}>실시간 시세를 {assetQuery.isError ? '불러오지 못했어요.' : '불러오는 중이에요.'}</Text></View>}
     <View style={[styles.scoreRow, { borderTopColor: colors.border }]}>
       <Text style={[styles.kicker, { color: colors.mutedForeground }]}>뉴스 영향도 점수</Text>
       <Text style={[styles.score, { color: colors.primary }]}>{item.impactScore}<Text style={[styles.scoreOutOf, { color: colors.mutedForeground }]}> / 100</Text></Text>

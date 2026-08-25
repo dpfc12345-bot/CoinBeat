@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useGetMarketOverview, useGetNews, type NewsItem as ApiNewsItem } from '@workspace/api-client-react';
 import { Screen } from '@/src/components/Screen';
@@ -16,9 +16,11 @@ const sizeLabels: Record<WidgetSize, string> = { small: '작은', medium: '중�
 export default function WidgetsScreen() {
   const colors = useColors();
   const [saved, setSaved] = useState(false);
+  const [previewKind, setPreviewKind] = useState<WidgetKind>('price');
+  const [previewSize, setPreviewSize] = useState<WidgetSize>('medium');
   const { preferences, isLoading: preferencesLoading, savePreferences } = useWidgetPreferences();
-  const kind = preferences.kind;
-  const size = preferences.size;
+  const kind = previewKind;
+  const size = previewSize;
   const selectedSymbols = preferences.selectedSymbols;
   const marketQuery = useGetMarketOverview();
   const allAssets = useMemo(() => {
@@ -30,7 +32,7 @@ export default function WidgetsScreen() {
   const newsQuery = useGetNews();
 
   const changeKind = (nextKind: WidgetKind) => {
-    void savePreferences({ ...preferences, kind: nextKind });
+    setPreviewKind(nextKind);
     setSaved(false);
   };
 
@@ -38,8 +40,7 @@ export default function WidgetsScreen() {
     const nextSymbols = selectedSymbols.includes(symbol)
       ? selectedSymbols.length === 1 ? selectedSymbols : selectedSymbols.filter((item) => item !== symbol)
       : [...selectedSymbols, symbol];
-    void savePreferences({ ...preferences, selectedSymbols: nextSymbols });
-    setSaved(false);
+    void savePreferences({ ...preferences, selectedSymbols: nextSymbols }).then(() => setSaved(true));
   };
 
   const selectedLabel = selectedAssets.length === 1
@@ -56,16 +57,16 @@ export default function WidgetsScreen() {
         <Text style={[styles.title, { color: colors.foreground }]}>홈 화면 위젯</Text>
       </View>
     </View>
-    <Text style={[styles.intro, { color: colors.mutedForeground }]}>선택을 저장하면 Android 홈 화면의 Market Pulse 위젯도 바로 갱신됩니다.</Text>
+    <Text style={[styles.intro, { color: colors.mutedForeground }]}>가격 위젯에 표시할 코인을 고르고 모양을 미리보세요. 실제 홈 화면에서는 가격·뉴스 위젯과 크기를 직접 선택합니다.</Text>
 
-    <Text style={[styles.label, { color: colors.mutedForeground }]}>위젯 종류</Text>
+    <Text style={[styles.label, { color: colors.mutedForeground }]}>미리보기 위젯 종류</Text>
     <View style={styles.segmentRow}>
       <Segment icon="trending-up-outline" label="가격 위젯" active={kind === 'price'} onPress={() => changeKind('price')} />
       <Segment icon="newspaper-outline" label="뉴스 위젯" active={kind === 'news'} onPress={() => changeKind('news')} />
     </View>
 
     {kind === 'price' && <>
-      <Text style={[styles.label, { color: colors.mutedForeground }]}>표시할 코인</Text>
+      <Text style={[styles.label, { color: colors.mutedForeground }]}>가격 위젯에 표시할 코인</Text>
       <View style={styles.coinPicker}>
         {allAssets.map((asset) => {
           const selected = selectedSymbols.includes(asset.symbol);
@@ -83,9 +84,9 @@ export default function WidgetsScreen() {
       </View>
     </>}
 
-    <Text style={[styles.label, { color: colors.mutedForeground }]}>크기</Text>
+    <Text style={[styles.label, { color: colors.mutedForeground }]}>미리보기 크기</Text>
     <View style={styles.sizeRow}>
-      {(['small', 'medium', 'large'] as WidgetSize[]).map((itemSize) => <Pressable key={itemSize} testID={`widget-size-${itemSize}`} onPress={() => { void savePreferences({ ...preferences, size: itemSize }); setSaved(false); }} style={[styles.sizeControl, { borderColor: size === itemSize ? colors.primary : colors.border, backgroundColor: size === itemSize ? colors.secondary : colors.card }]}>
+      {(['small', 'medium', 'large'] as WidgetSize[]).map((itemSize) => <Pressable key={itemSize} testID={`widget-size-${itemSize}`} onPress={() => { setPreviewSize(itemSize); setSaved(false); }} style={[styles.sizeControl, { borderColor: size === itemSize ? colors.primary : colors.border, backgroundColor: size === itemSize ? colors.secondary : colors.card }]}>
         <Text style={[styles.sizeText, { color: size === itemSize ? colors.foreground : colors.mutedForeground }]}>{sizeLabels[itemSize]}</Text>
         <Text style={[styles.sizeMeasure, { color: size === itemSize ? colors.primary : colors.mutedForeground }]}>{itemSize === 'small' ? '2 × 1' : itemSize === 'medium' ? '4 × 2' : '4 × 4'}</Text>
       </Pressable>)}
@@ -100,16 +101,16 @@ export default function WidgetsScreen() {
 
     <View style={[styles.summary, { borderColor: colors.border, backgroundColor: colors.card }]}>
       <View style={styles.summaryCopy}>
-        <Text style={[styles.summaryKicker, { color: colors.mutedForeground }]}>선택된 구성</Text>
-        <Text style={[styles.summaryTitle, { color: colors.foreground }]}>{kind === 'price' ? selectedLabel : 'CryptoPanic 주요 뉴스'} · {sizeLabels[size]} 위젯</Text>
+        <Text style={[styles.summaryKicker, { color: colors.mutedForeground }]}>미리보기 구성</Text>
+        <Text style={[styles.summaryTitle, { color: colors.foreground }]}>{kind === 'price' ? selectedLabel : '블록미디어 주요 뉴스'} · {sizeLabels[size]} 위젯</Text>
       </View>
       <Ionicons name={saved ? 'checkmark-circle' : 'phone-portrait-outline'} size={22} color={saved ? colors.positive : colors.primary} />
     </View>
     <Pressable testID="save-widget-preview" disabled={preferencesLoading} onPress={() => { void savePreferences(preferences).then(() => setSaved(true)); }} style={({ pressed }) => [styles.saveButton, { backgroundColor: colors.primary, opacity: pressed || preferencesLoading ? 0.6 : 1 }]}>
       <Ionicons name={saved ? 'checkmark' : 'add'} size={18} color={colors.primaryForeground} />
-      <Text style={[styles.saveText, { color: colors.primaryForeground }]}>{saved ? '위젯 구성을 저장했어요' : '위젯 구성 저장'}</Text>
+      <Text style={[styles.saveText, { color: colors.primaryForeground }]}>{saved ? '홈 화면 위젯을 새로고침했어요' : '홈 화면 위젯 새로고침'}</Text>
     </Pressable>
-    {saved && <Text style={[styles.savedNote, { color: colors.positive }]}>홈 화면을 길게 누른 뒤 위젯에서 Market Pulse를 선택해 추가하세요. Android는 최소 30분마다 자동 갱신됩니다.</Text>}
+    {saved && <Text style={[styles.savedNote, { color: colors.positive }]}>홈 화면을 길게 누른 뒤 위젯에서 Market Pulse를 선택해 추가하세요. 가격 위젯은 선택 코인을 반영하며, Android는 최소 30분마다 자동 갱신됩니다.</Text>}
   </Screen>;
 }
 
@@ -149,19 +150,19 @@ function NewsWidget({ items, size, isLoading, isError }: { items: ApiNewsItem[];
     <View style={[styles.widgetTop, styles.newsTop, { borderBottomColor: colors.border }]}>
       <View style={styles.assetLine}>
         <View style={[styles.assetIcon, { backgroundColor: colors.secondary }]}><Ionicons name="newspaper-outline" size={14} color={colors.primary} /></View>
-        <Text style={[styles.widgetName, { color: colors.foreground }]}>CryptoPanic 뉴스</Text>
+        <Text style={[styles.widgetName, { color: colors.foreground }]}>블록미디어 뉴스</Text>
       </View>
       <Text style={[styles.widgetSymbol, { color: colors.mutedForeground }]}>실시간</Text>
     </View>
     {isLoading && <View style={styles.widgetState}><Text style={[styles.widgetStateText, { color: colors.mutedForeground }]}>최신 뉴스를 불러오는 중이에요.</Text></View>}
     {isError && <View style={styles.widgetState}><Text style={[styles.widgetStateText, { color: colors.negative }]}>뉴스를 불러오지 못했어요.</Text></View>}
     {!isLoading && !isError && <View style={styles.newsList}>
-      {items.slice(0, count).map((item) => <Pressable key={item.id} testID={`widget-news-${item.id}`} onPress={() => router.push(`/news/${item.id}`)} style={({ pressed }) => [styles.widgetNewsRow, { borderBottomColor: colors.border, opacity: pressed ? 0.68 : 1 }]}>
+      {items.slice(0, count).map((item) => <Pressable key={item.id} testID={`widget-news-${item.id}`} onPress={() => { void Linking.openURL(item.sourceUrl); }} style={({ pressed }) => [styles.widgetNewsRow, { borderBottomColor: colors.border, opacity: pressed ? 0.68 : 1 }]}>
         <View style={styles.newsKickerRow}><Text style={[styles.newsKicker, { color: item.importance === 'breaking' ? colors.negative : colors.primary }]}>{item.importance === 'breaking' ? '속보' : item.relatedSymbols.join(' · ')}</Text><Text style={[styles.widgetSymbol, { color: colors.mutedForeground }]}>{item.relativeTime}</Text></View>
         <Text numberOfLines={size === 'small' ? 1 : 2} style={[styles.widgetHeadline, { color: colors.foreground }, size === 'large' && styles.largeHeadline]}>{item.title}</Text>
       </Pressable>)}
     </View>}
-    <View style={[styles.newsFooter, { borderTopColor: colors.border }]}><Text style={[styles.source, { color: colors.secondaryForeground }]}>CryptoPanic</Text><Text style={[styles.widgetSymbol, { color: colors.mutedForeground }]}>헤드라인을 누르면 상세 보기</Text></View>
+    <View style={[styles.newsFooter, { borderTopColor: colors.border }]}><Text style={[styles.source, { color: colors.secondaryForeground }]}>블록미디어 RSS</Text><Text style={[styles.widgetSymbol, { color: colors.mutedForeground }]}>헤드라인을 누르면 원문 열기</Text></View>
   </View>;
 }
 

@@ -2,14 +2,14 @@ import React from 'react';
 import type { WidgetInfo, WidgetTaskHandlerProps } from 'react-native-android-widget';
 import { MarketNewsWidget } from '@/src/widgets/MarketNewsWidget';
 import { MarketPriceWidget } from '@/src/widgets/MarketPriceWidget';
-import { getWidgetData } from '@/src/widgets/data';
+import { getNewsWidgetData, getPriceWidgetData } from '@/src/widgets/data';
 import { loadWidgetPreferences } from '@/src/widgets/preferences';
 import { widgetTheme } from '@/src/widgets/theme';
 import { FlexWidget, TextWidget } from 'react-native-android-widget';
 
 async function renderPriceWidget(widgetInfo: WidgetInfo) {
   try {
-    const [{ assets }, preferences] = await Promise.all([getWidgetData(), loadWidgetPreferences()]);
+    const [assets, preferences] = await Promise.all([getPriceWidgetData(), loadWidgetPreferences()]);
     const selectedAssets = assets.filter((asset) => preferences.selectedSymbols.includes(asset.symbol));
     return <MarketPriceWidget assets={selectedAssets.length > 0 ? selectedAssets : assets.slice(0, 4)} widgetInfo={widgetInfo} />;
   } catch (error) {
@@ -19,7 +19,7 @@ async function renderPriceWidget(widgetInfo: WidgetInfo) {
 
 async function renderNewsWidget(widgetInfo: WidgetInfo) {
   try {
-    const [{ news }] = await Promise.all([getWidgetData(), loadWidgetPreferences()]);
+    const news = await getNewsWidgetData();
     return <MarketNewsWidget items={news} widgetInfo={widgetInfo} />;
   } catch (error) {
     return <WidgetError message={error instanceof Error ? error.message : '뉴스를 불러오지 못했습니다.'} />;
