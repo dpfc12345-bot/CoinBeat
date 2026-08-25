@@ -1,3 +1,5 @@
+"use no memo";
+
 import React from 'react';
 import type { WidgetInfo, WidgetTaskHandlerProps } from 'react-native-android-widget';
 import { MarketNewsWidget } from '@/src/widgets/MarketNewsWidget';

@@ -1,3 +1,5 @@
+"use no memo";
+
 import React from 'react';
 import { FlexWidget, TextWidget, type WidgetInfo } from 'react-native-android-widget';
 import type { WidgetNews } from '@/src/widgets/data';

@@ -3,3 +3,4 @@
 - [Expo Router widget initialization](expo-router-widget-initialization.md) — Register Android widget headless tasks before loading Expo Router or widgets can remain blank.
 - [Development API routing](development-api-routing.md) — Expo development builds must prefer the Replit dev API over a configured production URL.
 - [Live notification cadence](live-notification-cadence.md) — Keep persistent market notifications quiet and slower than foreground market refreshes.
+- [Android widget compiler exclusion](android-widget-compiler-exclusion.md) — Widget JSX must opt out of React Compiler or Android can add a blank widget despite successful API calls.
