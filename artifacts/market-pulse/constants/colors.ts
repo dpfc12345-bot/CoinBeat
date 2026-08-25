@@ -13,30 +13,30 @@
  */
 
 const palette = {
-  text: '#F4F7F1',
-  tint: '#C9F64A',
-  background: '#080A0B',
-  foreground: '#F4F7F1',
-  card: '#111516',
-  cardForeground: '#F4F7F1',
-  primary: '#C9F64A',
-  primaryForeground: '#080A0B',
-  secondary: '#1A2020',
-  secondaryForeground: '#DCE4DB',
-  muted: '#151B1C',
-  mutedForeground: '#81908B',
-  accent: '#D9FF63',
-  accentForeground: '#080A0B',
-  destructive: '#FF5B62',
-  destructiveForeground: '#080A0B',
-  border: '#26302E',
-  input: '#26302E',
-  positive: '#C9F64A',
-  negative: '#FF7A80',
-  amber: '#FFB86B',
-  teal: '#70E1D2',
+  text: '#F4F7FF',
+  tint: '#4D9CFF',
+  background: '#070D1B',
+  foreground: '#F4F7FF',
+  card: '#0F1A30',
+  cardForeground: '#F4F7FF',
+  primary: '#4D9CFF',
+  primaryForeground: '#061121',
+  secondary: '#14233D',
+  secondaryForeground: '#D8E6FB',
+  muted: '#0B162A',
+  mutedForeground: '#8194B4',
+  accent: '#A9CEFF',
+  accentForeground: '#061121',
+  destructive: '#FF718C',
+  destructiveForeground: '#FFFFFF',
+  border: '#243B61',
+  input: '#243B61',
+  positive: '#68D8AB',
+  negative: '#FF8097',
+  amber: '#FFC36B',
+  teal: '#73CFFF',
 };
 
-const colors = { light: palette, dark: palette, radius: 8 };
+const colors = { light: palette, dark: palette, radius: 16 };
 
 export default colors;

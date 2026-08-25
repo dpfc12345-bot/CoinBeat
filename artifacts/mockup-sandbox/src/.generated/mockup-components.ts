@@ -5,5 +5,6 @@ export const modules: ModuleMap = {
   "./components/mockups/news-impact-widget/Current.tsx": () => import("../components/mockups/news-impact-widget/Current.tsx"),
   "./components/mockups/news-impact-widget/LargeImpact.tsx": () => import("../components/mockups/news-impact-widget/LargeImpact.tsx"),
   "./components/mockups/news-impact-widget/MediumTicker.tsx": () => import("../components/mockups/news-impact-widget/MediumTicker.tsx"),
-  "./components/mockups/news-impact-widget/SmallGlance.tsx": () => import("../components/mockups/news-impact-widget/SmallGlance.tsx")
+  "./components/mockups/news-impact-widget/SmallGlance.tsx": () => import("../components/mockups/news-impact-widget/SmallGlance.tsx"),
+  "./components/mockups/widget-studio/Studio.tsx": () => import("../components/mockups/widget-studio/Studio.tsx")
 };
