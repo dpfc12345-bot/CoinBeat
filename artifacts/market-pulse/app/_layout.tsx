@@ -17,6 +17,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { setBaseUrl } from '@workspace/api-client-react';
 import { WatchlistProvider } from '@/src/context/WatchlistContext';
 import { WidgetPreferencesProvider } from '@/src/context/WidgetPreferencesContext';
+import { refreshAndroidWidgets } from '@/src/widgets/refresh';
 import { getApiBaseUrl } from '@/src/config/api';
 import { isLiveNotificationEnabled, refreshLiveNotification } from '@/src/notifications/liveNotification';
 
@@ -55,7 +56,16 @@ export default function RootLayout() {
   useEffect(() => {
     if (Platform.OS !== 'android') return;
     const sync = async () => {
-      if (await isLiveNotificationEnabled()) await refreshLiveNotification();
+      try {
+        if (await isLiveNotificationEnabled()) await refreshLiveNotification();
+      } catch {
+        // A notification update must not block the home-screen widget refresh.
+      }
+      try {
+        await refreshAndroidWidgets();
+      } catch {
+        // The widget may not be installed yet, or Android may still be starting it.
+      }
     };
     void sync();
     const subscription = AppState.addEventListener('change', (state) => {

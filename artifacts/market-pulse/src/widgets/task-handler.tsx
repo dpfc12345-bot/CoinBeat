@@ -8,28 +8,22 @@ import { widgetTheme } from '@/src/widgets/theme';
 import { FlexWidget, TextWidget } from 'react-native-android-widget';
 
 async function renderPriceWidget(widgetInfo: WidgetInfo) {
-  try {
-    const [assets, preferences] = await Promise.all([getPriceWidgetData(), loadWidgetPreferences()]);
-    const selectedAssets = assets.filter((asset) => preferences.selectedSymbols.includes(asset.symbol));
-    return <MarketPriceWidget assets={selectedAssets.length > 0 ? selectedAssets : assets.slice(0, 4)} widgetInfo={widgetInfo} />;
-  } catch (error) {
-    return <WidgetError message={error instanceof Error ? error.message : '가격을 불러오지 못했습니다.'} />;
-  }
+  const [assets, preferences] = await Promise.all([getPriceWidgetData(), loadWidgetPreferences()]);
+  const selectedAssets = assets.filter((asset) => preferences.selectedSymbols.includes(asset.symbol));
+  if (assets.length === 0) throw new Error('표시할 가격 정보가 없습니다.');
+  return <MarketPriceWidget assets={selectedAssets.length > 0 ? selectedAssets : assets.slice(0, 4)} widgetInfo={widgetInfo} />;
 }
 
 async function renderNewsWidget(widgetInfo: WidgetInfo) {
-  try {
-    const news = await getNewsWidgetData();
-    return <MarketNewsWidget items={news} widgetInfo={widgetInfo} />;
-  } catch (error) {
-    return <WidgetError message={error instanceof Error ? error.message : '뉴스를 불러오지 못했습니다.'} />;
-  }
+  const news = await getNewsWidgetData();
+  if (news.length === 0) throw new Error('표시할 최신 뉴스가 없습니다.');
+  return <MarketNewsWidget items={news} widgetInfo={widgetInfo} />;
 }
 
-function WidgetError({ message }: { message: string }) {
+function WidgetError({ title = 'MARKET PULSE', message }: { title?: string; message: string }) {
   return (
     <FlexWidget clickAction="OPEN_URI" clickActionData={{ uri: 'market-pulse://widgets' }} style={{ backgroundColor: widgetTheme.background, borderRadius: 22, padding: 16, flexDirection: 'column', flexGap: 8 }}>
-      <TextWidget text="MARKET PULSE" style={{ color: widgetTheme.foreground, fontSize: 13, fontWeight: '700' }} />
+      <TextWidget text={title} style={{ color: widgetTheme.foreground, fontSize: 13, fontWeight: '700' }} />
       <TextWidget text={message} maxLines={3} truncate="END" style={{ color: widgetTheme.muted, fontSize: 12, lineHeight: 16 }} />
       <TextWidget text="탭하여 앱에서 설정 확인" style={{ color: widgetTheme.primary, fontSize: 11, fontWeight: '700' }} />
     </FlexWidget>
@@ -37,7 +31,15 @@ function WidgetError({ message }: { message: string }) {
 }
 
 export async function renderMarketPulseWidget(widgetName: string, widgetInfo: WidgetInfo) {
-  return widgetName === 'MarketNews' ? renderNewsWidget(widgetInfo) : renderPriceWidget(widgetInfo);
+  try {
+    if (widgetName === 'MarketPrice') return await renderPriceWidget(widgetInfo);
+    if (widgetName === 'MarketNews') return await renderNewsWidget(widgetInfo);
+    return <WidgetError title="MARKET PULSE" message="알 수 없는 위젯입니다. 탭하여 다시 설정하세요." />;
+  } catch (error) {
+    const label = widgetName === 'MarketNews' ? 'MARKET PULSE NEWS' : 'MARKET PULSE · KRW';
+    const message = error instanceof Error ? error.message : '위젯을 불러오지 못했습니다.';
+    return <WidgetError title={label} message={message} />;
+  }
 }
 
 export async function widgetTaskHandler(props: WidgetTaskHandlerProps): Promise<void> {

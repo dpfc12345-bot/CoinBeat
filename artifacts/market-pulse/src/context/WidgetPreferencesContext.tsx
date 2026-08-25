@@ -1,8 +1,6 @@
 import React, { createContext, type PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
-import { Platform } from 'react-native';
-import { requestWidgetUpdate } from 'react-native-android-widget';
 import { loadWidgetPreferences, type WidgetPreferences, widgetPreferencesKey } from '@/src/widgets/preferences';
-import { renderMarketPulseWidget } from '@/src/widgets/task-handler';
+import { refreshAndroidWidgets } from '@/src/widgets/refresh';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type WidgetPreferencesContextValue = {
@@ -13,23 +11,32 @@ type WidgetPreferencesContextValue = {
 
 const WidgetPreferencesContext = createContext<WidgetPreferencesContextValue | null>(null);
 
-async function refreshAndroidWidgets() {
-  if (Platform.OS !== 'android') return;
-  await Promise.all(['MarketPrice', 'MarketNews'].map((widgetName) => requestWidgetUpdate({
-    widgetName,
-    renderWidget: (widgetInfo) => renderMarketPulseWidget(widgetName, widgetInfo),
-  })));
-}
-
 export function WidgetPreferencesProvider({ children }: PropsWithChildren) {
   const [preferences, setPreferences] = useState<WidgetPreferences>({ kind: 'price', size: 'medium', selectedSymbols: ['BTC', 'ETH', 'SOL', 'XRP'] });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadWidgetPreferences().then((stored) => {
-      setPreferences(stored);
-      setIsLoading(false);
-    });
+    let active = true;
+
+    const hydratePreferences = async () => {
+      try {
+        const stored = await loadWidgetPreferences();
+        if (active) setPreferences(stored);
+      } finally {
+        if (active) setIsLoading(false);
+      }
+
+      try {
+        await refreshAndroidWidgets();
+      } catch {
+        // The widget may not be installed yet, or Android may still be starting it.
+      }
+    };
+
+    void hydratePreferences();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const savePreferences = async (next: WidgetPreferences) => {
