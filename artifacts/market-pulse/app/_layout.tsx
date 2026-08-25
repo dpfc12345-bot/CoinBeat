@@ -15,13 +15,16 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { setBaseUrl } from '@workspace/api-client-react';
 import { WatchlistProvider } from '@/src/context/WatchlistContext';
+import { WidgetPreferencesProvider } from '@/src/context/WidgetPreferencesContext';
+import { getApiBaseUrl } from '@/src/config/api';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
-setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
+const apiBaseUrl = getApiBaseUrl();
+if (apiBaseUrl) setBaseUrl(apiBaseUrl);
 
 function RootLayoutNav() {
   return (
@@ -53,13 +56,15 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <WatchlistProvider>
-            <GestureHandlerRootView>
-              <KeyboardProvider>
-                <RootLayoutNav />
-              </KeyboardProvider>
-            </GestureHandlerRootView>
-          </WatchlistProvider>
+          <WidgetPreferencesProvider>
+            <WatchlistProvider>
+              <GestureHandlerRootView>
+                <KeyboardProvider>
+                  <RootLayoutNav />
+                </KeyboardProvider>
+              </GestureHandlerRootView>
+            </WatchlistProvider>
+          </WidgetPreferencesProvider>
         </QueryClientProvider>
       </ErrorBoundary>
     </SafeAreaProvider>

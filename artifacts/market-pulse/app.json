@@ -30,7 +30,40 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "MarketPrice",
+              "label": "Market Pulse 가격",
+              "description": "선택한 코인의 실시간 Upbit KRW 가격",
+              "minWidth": "160dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 1,
+              "maxResizeWidth": "440dp",
+              "maxResizeHeight": "300dp",
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            },
+            {
+              "name": "MarketNews",
+              "label": "Market Pulse 뉴스",
+              "description": "최신 CryptoPanic 암호화폐 헤드라인",
+              "minWidth": "160dp",
+              "minHeight": "150dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "maxResizeWidth": "440dp",
+              "maxResizeHeight": "360dp",
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

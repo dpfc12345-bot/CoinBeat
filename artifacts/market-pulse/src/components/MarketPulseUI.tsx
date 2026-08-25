@@ -7,7 +7,7 @@ import { useColors } from '@/hooks/useColors';
 import { MarketAsset, NewsItem } from '@/src/models';
 import { useWatchlist } from '@/src/context/WatchlistContext';
 
-export const formatPrice = (value: number) => value >= 1000 ? '$' + value.toLocaleString('en-US', { maximumFractionDigits: 0 }) : value < 1 ? '$' + value.toFixed(4) : '$' + value.toFixed(2);
+export const formatPrice = (value: number) => `₩${Math.round(value).toLocaleString('ko-KR')}`;
 export const formatPercent = (value: number) => (value >= 0 ? '+' : '') + value.toFixed(2) + '%';
 export const formatCategory = (category: string) => ({ MARKET: '시장', ETF: 'ETF', MACRO: '거시경제', DEFI: '디파이', ALTCOIN: '알트코인', EXCHANGE: '거래소', LISTING: '상장' }[category] ?? category);
 

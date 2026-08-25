@@ -7,7 +7,7 @@ export interface NewsItem {
   source: string;
   publishedAt: string;
   relativeTime: string;
-  categories: NewsCategory[];
+  categories: string[];
   relatedSymbols: string[];
   importance: 'breaking' | 'high' | 'standard';
   priceChange: number;
