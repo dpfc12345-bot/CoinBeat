@@ -10,10 +10,15 @@
     },
     "preview": {
       "distribution": "internal",
-      "environment": "preview"
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://market-pulse-mobail-aeb.replit.app"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://market-pulse-mobail-aeb.replit.app"
+      }
     }
   },
   "submit": {
