@@ -13,6 +13,7 @@ import {
 } from '@expo-google-fonts/inter';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { setBaseUrl } from '@workspace/api-client-react';
 import { WatchlistProvider } from '@/src/context/WatchlistContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -20,11 +21,14 @@ SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
+setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
+
 function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerBackTitle: 'Back' }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="widgets" options={{ headerShown: false }} />
+        <Stack.Screen name="news/[id]" options={{ headerShown: false }} />
     </Stack>
   );
 }

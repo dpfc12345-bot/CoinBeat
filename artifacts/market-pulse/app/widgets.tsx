@@ -2,12 +2,11 @@ import React, { useMemo, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import Svg, { Path, Polyline } from 'react-native-svg';
+import { useGetNews, type NewsItem as ApiNewsItem } from '@workspace/api-client-react';
 import { Screen } from '@/src/components/Screen';
-import { formatPrice } from '@/src/components/MarketPulseUI';
-import { getMockSnapshot, mockNews } from '@/src/data/mockData';
+import { getMockSnapshot } from '@/src/data/mockData';
 import { useColors } from '@/hooks/useColors';
-import { MarketAsset, NewsItem } from '@/src/models';
+import { MarketAsset } from '@/src/models';
 
 type WidgetKind = 'price' | 'news';
 type WidgetSize = 'small' | 'medium' | 'large';
@@ -18,9 +17,34 @@ export default function WidgetsScreen() {
   const colors = useColors();
   const [kind, setKind] = useState<WidgetKind>('price');
   const [size, setSize] = useState<WidgetSize>('medium');
+  const [selectedSymbols, setSelectedSymbols] = useState<string[]>(['BTC', 'ETH', 'SOL', 'XRP']);
   const [saved, setSaved] = useState(false);
-  const asset = useMemo(() => getMockSnapshot().assets[0], []);
-  const item = mockNews[0];
+  const allAssets = useMemo(() => {
+    const preferredOrder = ['BTC', 'ETH', 'SOL', 'XRP'];
+    const assets = getMockSnapshot().assets;
+    return preferredOrder.map((symbol) => assets.find((asset) => asset.symbol === symbol)).filter((asset): asset is MarketAsset => Boolean(asset));
+  }, []);
+  const selectedAssets = allAssets.filter((asset) => selectedSymbols.includes(asset.symbol));
+  const newsQuery = useGetNews();
+
+  const changeKind = (nextKind: WidgetKind) => {
+    setKind(nextKind);
+    setSaved(false);
+  };
+
+  const toggleAsset = (symbol: string) => {
+    setSelectedSymbols((current) => {
+      if (current.includes(symbol)) {
+        return current.length === 1 ? current : current.filter((item) => item !== symbol);
+      }
+      return [...current, symbol];
+    });
+    setSaved(false);
+  };
+
+  const selectedLabel = selectedAssets.length === 1
+    ? `${selectedAssets[0].name} 가격`
+    : `${selectedAssets.length}개 코인 가격`;
 
   return <Screen>
     <View style={styles.header}>
@@ -33,11 +57,32 @@ export default function WidgetsScreen() {
       </View>
     </View>
     <Text style={[styles.intro, { color: colors.mutedForeground }]}>홈 화면에서 가장 먼저 보고 싶은 정보를 골라보세요.</Text>
+
     <Text style={[styles.label, { color: colors.mutedForeground }]}>위젯 종류</Text>
     <View style={styles.segmentRow}>
-      <Segment icon="trending-up-outline" label="가격 위젯" active={kind === 'price'} onPress={() => { setKind('price'); setSaved(false); }} />
-      <Segment icon="newspaper-outline" label="뉴스 위젯" active={kind === 'news'} onPress={() => { setKind('news'); setSaved(false); }} />
+      <Segment icon="trending-up-outline" label="가격 위젯" active={kind === 'price'} onPress={() => changeKind('price')} />
+      <Segment icon="newspaper-outline" label="뉴스 위젯" active={kind === 'news'} onPress={() => changeKind('news')} />
     </View>
+
+    {kind === 'price' && <>
+      <Text style={[styles.label, { color: colors.mutedForeground }]}>표시할 코인</Text>
+      <View style={styles.coinPicker}>
+        {allAssets.map((asset) => {
+          const selected = selectedSymbols.includes(asset.symbol);
+          return <Pressable
+            key={asset.symbol}
+            testID={`widget-coin-${asset.symbol}`}
+            onPress={() => toggleAsset(asset.symbol)}
+            style={({ pressed }) => [styles.coinChip, { borderColor: selected ? colors.primary : colors.border, backgroundColor: selected ? colors.secondary : colors.card, opacity: pressed ? 0.72 : 1 }]}
+          >
+            <View style={[styles.coinDot, { backgroundColor: asset.accent }]} />
+            <Text style={[styles.coinChipText, { color: selected ? colors.foreground : colors.mutedForeground }]}>{asset.symbol}</Text>
+            {selected && <Ionicons name="checkmark" size={14} color={colors.primary} />}
+          </Pressable>;
+        })}
+      </View>
+    </>}
+
     <Text style={[styles.label, { color: colors.mutedForeground }]}>크기</Text>
     <View style={styles.sizeRow}>
       {(['small', 'medium', 'large'] as WidgetSize[]).map((itemSize) => <Pressable key={itemSize} testID={`widget-size-${itemSize}`} onPress={() => { setSize(itemSize); setSaved(false); }} style={[styles.sizeControl, { borderColor: size === itemSize ? colors.primary : colors.border, backgroundColor: size === itemSize ? colors.secondary : colors.card }]}>
@@ -45,14 +90,18 @@ export default function WidgetsScreen() {
         <Text style={[styles.sizeMeasure, { color: size === itemSize ? colors.primary : colors.mutedForeground }]}>{itemSize === 'small' ? '2 × 1' : itemSize === 'medium' ? '4 × 2' : '4 × 4'}</Text>
       </Pressable>)}
     </View>
+
     <Text style={[styles.label, { color: colors.mutedForeground }]}>미리보기</Text>
     <View style={[styles.previewWell, { borderColor: colors.border, backgroundColor: colors.muted }]}>
-      {kind === 'price' ? <PriceWidget asset={asset} size={size} /> : <NewsWidget item={item} size={size} />}
+      {kind === 'price'
+        ? <PriceWidget assets={selectedAssets} size={size} />
+        : <NewsWidget items={newsQuery.data ?? []} size={size} isLoading={newsQuery.isLoading} isError={newsQuery.isError} />}
     </View>
+
     <View style={[styles.summary, { borderColor: colors.border, backgroundColor: colors.card }]}>
-      <View>
+      <View style={styles.summaryCopy}>
         <Text style={[styles.summaryKicker, { color: colors.mutedForeground }]}>선택된 구성</Text>
-        <Text style={[styles.summaryTitle, { color: colors.foreground }]}>{kind === 'price' ? '비트코인 가격' : '코인니스 주요 뉴스'} · {sizeLabels[size]} 위젯</Text>
+        <Text style={[styles.summaryTitle, { color: colors.foreground }]}>{kind === 'price' ? selectedLabel : '코인니스 주요 뉴스'} · {sizeLabels[size]} 위젯</Text>
       </View>
       <Ionicons name={saved ? 'checkmark-circle' : 'phone-portrait-outline'} size={22} color={saved ? colors.positive : colors.primary} />
     </View>
@@ -73,38 +122,111 @@ function Segment({ icon, label, active, onPress }: { icon: keyof typeof Ionicons
   </Pressable>;
 }
 
-function PriceWidget({ asset, size }: { asset: MarketAsset; size: WidgetSize }) {
+function PriceWidget({ assets, size }: { assets: MarketAsset[]; size: WidgetSize }) {
   const colors = useColors();
-  const isLarge = size === 'large';
   return <View style={[styles.widgetCard, widgetSizes[size], { backgroundColor: colors.card, borderColor: colors.primary }]}>
     <View style={styles.widgetTop}>
-      <View style={styles.assetLine}><View style={[styles.assetIcon, { backgroundColor: colors.secondary }]}><Ionicons name="trending-up" size={14} color={colors.primary} /></View><View><Text style={[styles.widgetName, { color: colors.foreground }]}>비트코인</Text><Text style={[styles.widgetSymbol, { color: colors.mutedForeground }]}>BTC/KRW</Text></View></View>
+      <View style={styles.assetLine}>
+        <View style={[styles.assetIcon, { backgroundColor: colors.secondary }]}><Ionicons name="trending-up" size={14} color={colors.primary} /></View>
+        <View><Text style={[styles.widgetName, { color: colors.foreground }]}>선택 코인 가격</Text><Text style={[styles.widgetSymbol, { color: colors.mutedForeground }]}>MARKET PULSE</Text></View>
+      </View>
       <Text style={[styles.liveText, { color: colors.positive }]}>● 거래중</Text>
     </View>
-    <Text style={[styles.krwPrice, { color: colors.foreground }]}>₩{Math.round(asset.price * 1350).toLocaleString('ko-KR')}</Text>
-    <Text style={[styles.widgetChange, { color: colors.positive }]}>{asset.change24h >= 0 ? '+' : ''}{asset.change24h.toFixed(2)}% <Text style={[styles.today, { color: colors.mutedForeground }]}>오늘</Text></Text>
-    {size !== 'small' && <PriceLine color={colors.primary} fill={colors.secondary} />}
-    {isLarge && <View style={[styles.priceFooter, { borderTopColor: colors.border }]}><Text style={[styles.footerMetric, { color: colors.mutedForeground }]}>고가 <Text style={{ color: colors.foreground }}>₩144,120,000</Text></Text><Text style={[styles.footerMetric, { color: colors.mutedForeground }]}>저가 <Text style={{ color: colors.foreground }}>₩139,680,000</Text></Text></View>}
+    <View style={styles.priceGrid}>
+      {assets.map((asset) => <View key={asset.symbol} style={[styles.priceCell, { borderColor: colors.border }]}>
+        <View style={styles.priceCellTop}><Text style={[styles.priceSymbol, { color: colors.foreground }]}>{asset.symbol}</Text><Text style={[styles.priceChange, { color: asset.change24h >= 0 ? colors.positive : colors.negative }]}>{asset.change24h >= 0 ? '+' : ''}{asset.change24h.toFixed(2)}%</Text></View>
+        <Text numberOfLines={1} style={[styles.widgetPrice, { color: colors.foreground }]}>{formatKrwPrice(asset.price)}</Text>
+      </View>)}
+    </View>
+    {size === 'large' && <View style={[styles.priceFooter, { borderTopColor: colors.border }]}><Text style={[styles.footerMetric, { color: colors.mutedForeground }]}>선택 코인 <Text style={{ color: colors.foreground }}>{assets.length}개</Text></Text><Text style={[styles.footerMetric, { color: colors.mutedForeground }]}>업데이트 <Text style={{ color: colors.foreground }}>방금 전</Text></Text></View>}
   </View>;
 }
 
-function NewsWidget({ item, size }: { item: NewsItem; size: WidgetSize }) {
+function NewsWidget({ items, size, isLoading, isError }: { items: ApiNewsItem[]; size: WidgetSize; isLoading: boolean; isError: boolean }) {
   const colors = useColors();
+  const count = size === 'small' ? 2 : size === 'medium' ? 3 : 4;
   return <View style={[styles.widgetCard, widgetSizes[size], { backgroundColor: colors.card, borderColor: colors.primary }]}>
-    <View style={[styles.widgetTop, styles.newsTop, { borderBottomColor: colors.border }]}><View style={styles.assetLine}><View style={[styles.assetIcon, { backgroundColor: colors.secondary }]}><Ionicons name="newspaper-outline" size={14} color={colors.primary} /></View><Text style={[styles.widgetName, { color: colors.foreground }]}>Coinness 뉴스</Text></View><Text style={[styles.widgetSymbol, { color: colors.mutedForeground }]}>MARKET PULSE</Text></View>
-    <View style={styles.newsContent}><View style={styles.newsKickerRow}><Text style={[styles.newsKicker, { color: colors.primary }]}>주요 뉴스</Text><Text style={[styles.widgetSymbol, { color: colors.mutedForeground }]}>비트코인</Text></View><Text numberOfLines={size === 'small' ? 2 : 3} style={[styles.widgetHeadline, { color: colors.foreground }, size === 'large' && styles.largeHeadline]}>{item.title}</Text>{size !== 'small' && <Text numberOfLines={2} style={[styles.widgetDescription, { color: colors.mutedForeground }]}>{item.content}</Text>}</View>
-    <View style={[styles.newsFooter, { borderTopColor: colors.border }]}><Text style={[styles.source, { color: colors.secondaryForeground }]}>{item.source}</Text><Text style={[styles.widgetSymbol, { color: colors.mutedForeground }]}>{item.relativeTime}</Text></View>
+    <View style={[styles.widgetTop, styles.newsTop, { borderBottomColor: colors.border }]}>
+      <View style={styles.assetLine}>
+        <View style={[styles.assetIcon, { backgroundColor: colors.secondary }]}><Ionicons name="newspaper-outline" size={14} color={colors.primary} /></View>
+        <Text style={[styles.widgetName, { color: colors.foreground }]}>Coinness 뉴스</Text>
+      </View>
+      <Text style={[styles.widgetSymbol, { color: colors.mutedForeground }]}>실시간</Text>
+    </View>
+    {isLoading && <View style={styles.widgetState}><Text style={[styles.widgetStateText, { color: colors.mutedForeground }]}>최신 뉴스를 불러오는 중이에요.</Text></View>}
+    {isError && <View style={styles.widgetState}><Text style={[styles.widgetStateText, { color: colors.negative }]}>뉴스를 불러오지 못했어요.</Text></View>}
+    {!isLoading && !isError && <View style={styles.newsList}>
+      {items.slice(0, count).map((item) => <Pressable key={item.id} testID={`widget-news-${item.id}`} onPress={() => router.push(`/news/${item.id}`)} style={({ pressed }) => [styles.widgetNewsRow, { borderBottomColor: colors.border, opacity: pressed ? 0.68 : 1 }]}>
+        <View style={styles.newsKickerRow}><Text style={[styles.newsKicker, { color: item.importance === 'breaking' ? colors.negative : colors.primary }]}>{item.importance === 'breaking' ? '속보' : item.relatedSymbols.join(' · ')}</Text><Text style={[styles.widgetSymbol, { color: colors.mutedForeground }]}>{item.relativeTime}</Text></View>
+        <Text numberOfLines={size === 'small' ? 1 : 2} style={[styles.widgetHeadline, { color: colors.foreground }, size === 'large' && styles.largeHeadline]}>{item.title}</Text>
+      </Pressable>)}
+    </View>}
+    <View style={[styles.newsFooter, { borderTopColor: colors.border }]}><Text style={[styles.source, { color: colors.secondaryForeground }]}>코인니스</Text><Text style={[styles.widgetSymbol, { color: colors.mutedForeground }]}>헤드라인을 누르면 상세 보기</Text></View>
   </View>;
 }
 
-function PriceLine({ color, fill }: { color: string; fill: string }) {
-  return <Svg width="100%" height={40} viewBox="0 0 300 40" preserveAspectRatio="none" style={styles.priceLine}>
-    <Path d="M0 38 L0 29 C20 28 25 21 40 25 S62 19 78 23 S105 15 120 20 S150 10 166 16 S190 12 204 15 S232 4 246 10 S275 2 300 7 L300 40 Z" fill={fill} opacity={0.75} />
-    <Polyline points="0,29 24,27 40,25 62,19 78,23 105,15 120,20 150,10 166,16 190,12 204,15 232,4 246,10 275,2 300,7" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
-  </Svg>;
+function formatKrwPrice(price: number) {
+  return `₩${Math.round(price * 1350).toLocaleString('ko-KR')}`;
 }
 
-const widgetSizes = StyleSheet.create({ small: { width: 250, minHeight: 148 }, medium: { width: 330, minHeight: 210 }, large: { width: 350, minHeight: 292 } });
+const widgetSizes = StyleSheet.create({
+  small: { width: 250, minHeight: 184 },
+  medium: { width: '100%', minHeight: 232 },
+  large: { width: '100%', minHeight: 292 },
+});
+
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 8 }, back: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1 }, headerCopy: { flex: 1 }, eyebrow: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2 }, title: { fontFamily: 'Inter_700Bold', fontSize: 27, letterSpacing: -1.1, marginTop: 4 }, intro: { fontFamily: 'Inter_500Medium', fontSize: 13, lineHeight: 19, marginBottom: 26 }, label: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.1, marginBottom: 9 }, segmentRow: { flexDirection: 'row', gap: 9, marginBottom: 24 }, segment: { flex: 1, minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderRadius: 14, paddingHorizontal: 12 }, segmentText: { fontFamily: 'Inter_700Bold', fontSize: 12 }, segmentCheck: { marginLeft: 'auto' }, sizeRow: { flexDirection: 'row', gap: 8, marginBottom: 24 }, sizeControl: { flex: 1, alignItems: 'center', borderWidth: 1, borderRadius: 13, paddingVertical: 10 }, sizeText: { fontFamily: 'Inter_700Bold', fontSize: 12 }, sizeMeasure: { fontFamily: 'Inter_500Medium', fontSize: 9, marginTop: 3 }, previewWell: { minHeight: 340, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderRadius: 20, padding: 18, marginBottom: 16 }, widgetCard: { borderWidth: 1, borderRadius: 20, padding: 16, justifyContent: 'space-between' }, widgetTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, assetLine: { flexDirection: 'row', alignItems: 'center', gap: 8 }, assetIcon: { width: 29, height: 29, borderRadius: 15, alignItems: 'center', justifyContent: 'center' }, widgetName: { fontFamily: 'Inter_700Bold', fontSize: 12 }, widgetSymbol: { fontFamily: 'Inter_500Medium', fontSize: 9, letterSpacing: 0.3, marginTop: 2 }, liveText: { fontFamily: 'Inter_600SemiBold', fontSize: 9 }, krwPrice: { fontFamily: 'Inter_700Bold', fontSize: 25, letterSpacing: -1.1, marginTop: 11 }, widgetChange: { fontFamily: 'Inter_700Bold', fontSize: 11, marginTop: 4 }, today: { fontFamily: 'Inter_500Medium', fontSize: 10 }, priceLine: { marginTop: 12 }, priceFooter: { flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, paddingTop: 10, marginTop: 4 }, footerMetric: { fontFamily: 'Inter_500Medium', fontSize: 9 }, newsTop: { paddingBottom: 12, borderBottomWidth: 1 }, newsContent: { flex: 1, justifyContent: 'center', paddingVertical: 10 }, newsKickerRow: { flexDirection: 'row', gap: 8, alignItems: 'center', marginBottom: 8 }, newsKicker: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.4 }, widgetHeadline: { fontFamily: 'Inter_700Bold', fontSize: 17, lineHeight: 23, letterSpacing: -0.6 }, largeHeadline: { fontSize: 21, lineHeight: 28 }, widgetDescription: { fontFamily: 'Inter_500Medium', fontSize: 10, lineHeight: 15, marginTop: 8 }, newsFooter: { flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, paddingTop: 10 }, source: { fontFamily: 'Inter_700Bold', fontSize: 10 }, summary: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderRadius: 16, padding: 15, marginBottom: 12 }, summaryKicker: { fontFamily: 'Inter_500Medium', fontSize: 10 }, summaryTitle: { fontFamily: 'Inter_700Bold', fontSize: 13, marginTop: 5, letterSpacing: -0.3 }, saveButton: { minHeight: 52, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7 }, saveText: { fontFamily: 'Inter_700Bold', fontSize: 14 }, savedNote: { fontFamily: 'Inter_600SemiBold', fontSize: 11, textAlign: 'center', marginTop: 12 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 8 },
+  back: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
+  headerCopy: { flex: 1 },
+  eyebrow: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.2 },
+  title: { fontFamily: 'Inter_700Bold', fontSize: 27, letterSpacing: -1.1, marginTop: 4 },
+  intro: { fontFamily: 'Inter_500Medium', fontSize: 13, lineHeight: 19, marginBottom: 26 },
+  label: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.1, marginBottom: 9 },
+  segmentRow: { flexDirection: 'row', gap: 9, marginBottom: 24 },
+  segment: { flex: 1, minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderRadius: 14, paddingHorizontal: 12 },
+  segmentText: { fontFamily: 'Inter_700Bold', fontSize: 12 },
+  segmentCheck: { marginLeft: 'auto' },
+  coinPicker: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 24 },
+  coinChip: { minWidth: 74, minHeight: 38, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1, borderRadius: 12, paddingHorizontal: 10 },
+  coinDot: { width: 7, height: 7, borderRadius: 4 },
+  coinChipText: { fontFamily: 'Inter_700Bold', fontSize: 12 },
+  sizeRow: { flexDirection: 'row', gap: 8, marginBottom: 24 },
+  sizeControl: { flex: 1, alignItems: 'center', borderWidth: 1, borderRadius: 13, paddingVertical: 10 },
+  sizeText: { fontFamily: 'Inter_700Bold', fontSize: 12 },
+  sizeMeasure: { fontFamily: 'Inter_500Medium', fontSize: 9, marginTop: 3 },
+  previewWell: { minHeight: 340, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderRadius: 20, padding: 18, marginBottom: 16 },
+  widgetCard: { borderWidth: 1, borderRadius: 20, padding: 15, justifyContent: 'space-between', alignSelf: 'center' },
+  widgetTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  assetLine: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  assetIcon: { width: 29, height: 29, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
+  widgetName: { fontFamily: 'Inter_700Bold', fontSize: 12 },
+  widgetSymbol: { fontFamily: 'Inter_500Medium', fontSize: 9, letterSpacing: 0.3, marginTop: 2 },
+  liveText: { fontFamily: 'Inter_600SemiBold', fontSize: 9 },
+  priceGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
+  priceCell: { width: '47%', borderWidth: 1, borderRadius: 11, padding: 9 },
+  priceCellTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 4 },
+  priceSymbol: { fontFamily: 'Inter_700Bold', fontSize: 11 },
+  priceChange: { fontFamily: 'Inter_700Bold', fontSize: 8 },
+  widgetPrice: { fontFamily: 'Inter_700Bold', fontSize: 12, marginTop: 7, letterSpacing: -0.35 },
+  priceFooter: { flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, paddingTop: 10, marginTop: 12 },
+  footerMetric: { fontFamily: 'Inter_500Medium', fontSize: 9 },
+  newsTop: { paddingBottom: 12, borderBottomWidth: 1 },
+  newsList: { flex: 1, justifyContent: 'center' },
+  widgetNewsRow: { paddingVertical: 9, borderBottomWidth: 1 },
+  newsKickerRow: { flexDirection: 'row', gap: 8, alignItems: 'center', marginBottom: 4 },
+  newsKicker: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.4 },
+  widgetHeadline: { fontFamily: 'Inter_700Bold', fontSize: 13, lineHeight: 18, letterSpacing: -0.35 },
+  largeHeadline: { fontSize: 14, lineHeight: 19 },
+  widgetState: { flex: 1, minHeight: 95, alignItems: 'center', justifyContent: 'center' },
+  widgetStateText: { fontFamily: 'Inter_500Medium', fontSize: 11 },
+  newsFooter: { flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, paddingTop: 10 },
+  source: { fontFamily: 'Inter_700Bold', fontSize: 10 },
+  summary: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderRadius: 16, padding: 15, marginBottom: 12, gap: 12 },
+  summaryCopy: { flex: 1 },
+  summaryKicker: { fontFamily: 'Inter_500Medium', fontSize: 10 },
+  summaryTitle: { fontFamily: 'Inter_700Bold', fontSize: 13, marginTop: 5, letterSpacing: -0.3 },
+  saveButton: { minHeight: 52, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7 },
+  saveText: { fontFamily: 'Inter_700Bold', fontSize: 14 },
+  savedNote: { fontFamily: 'Inter_600SemiBold', fontSize: 11, textAlign: 'center', marginTop: 12 },
 });

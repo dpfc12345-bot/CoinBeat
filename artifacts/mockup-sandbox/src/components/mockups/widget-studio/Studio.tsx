@@ -11,28 +11,37 @@ const sizes: Record<Size, { label: string; dimensions: string; width: number; he
   large: { label: "큰", dimensions: "4 × 4", width: 378, height: 284 },
 };
 
+const priceAssets = [
+  { symbol: "BTC", price: "₩152.8M", change: "+3.82%" },
+  { symbol: "ETH", price: "₩4.7M", change: "+2.41%" },
+  { symbol: "SOL", price: "₩271K", change: "+6.17%" },
+  { symbol: "XRP", price: "₩820", change: "-1.08%" },
+];
+
 function PriceWidget({ size, selected, onSelect }: { size: Size; selected: boolean; onSelect: () => void }) {
   const config = sizes[size];
   return (
-    <button type="button" aria-label="비트코인 가격 위젯 선택" aria-pressed={selected}
+    <button type="button" aria-label="여러 코인 가격 위젯 선택" aria-pressed={selected}
       onClick={onSelect} className={`studio-widget studio-widget-button ${selected ? "is-selected" : ""} studio-fade rounded-[18px] p-4 text-left`}
       style={{ width: `min(${config.width}px, 100%)`, height: config.height }}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1d5fc0] text-[#b8d6ff]"><Activity size={14} strokeWidth={2.2} /></span>
-          <span className="text-[12px] font-semibold tracking-[-.03em]">비트코인</span>
-          <span className="font-mono text-[9px] text-[#7891b9]">BTC/KRW</span>
+          <span className="text-[12px] font-semibold tracking-[-.03em]">시장 가격</span>
+          <span className="font-mono text-[9px] text-[#7891b9]">4종목</span>
         </div>
         <span className="flex items-center gap-1 text-[10px] text-[#75d8b0]"><span className="h-1.5 w-1.5 rounded-full bg-[#63d2a7]" /> 거래중</span>
       </div>
-      <div className="mt-3 flex items-end justify-between">
-        <div>
-          <p className="font-mono text-[26px] font-bold tracking-[-.07em] text-[#f4f8ff]">₩142,830,000</p>
-          <p className="mt-1 font-mono text-[10px] text-[#70d8a9]">+2.41% <span className="text-[#7185a6]">오늘</span></p>
-        </div>
-        {size !== "small" && <span className="mb-1 flex items-center gap-1 text-[9px] text-[#7790b5]">업비트 <ArrowUpRight size={10} /></span>}
+      <div className={`mt-3 grid ${size === "small" ? "grid-cols-4 gap-1.5" : "grid-cols-2 gap-2"}`}>
+        {priceAssets.map((asset) => (
+          <div key={asset.symbol} className="rounded-[10px] border border-[#2a4167] bg-[#112343]/80 px-2 py-2">
+            <p className="font-mono text-[9px] font-semibold text-[#9fb4d5]">{asset.symbol}</p>
+            <p className={`${size === "small" ? "text-[10px]" : "text-[12px]"} mt-1 truncate font-mono font-bold tracking-[-.05em] text-[#f4f8ff]`}>{asset.price}</p>
+            <p className={`mt-0.5 font-mono text-[8px] font-semibold ${asset.change.startsWith("-") ? "text-[#ff8097]" : "text-[#70d8a9]"}`}>{asset.change}</p>
+          </div>
+        ))}
       </div>
-      {size !== "small" && <svg className="mt-3 h-[34px] w-full overflow-visible" viewBox="0 0 320 34" preserveAspectRatio="none" aria-label="비트코인 가격 추이">
+      {size !== "small" && <svg className="mt-3 h-[27px] w-full overflow-visible" viewBox="0 0 320 34" preserveAspectRatio="none" aria-label="시장 가격 추이">
         <path d="M0 27 C18 26, 22 22, 37 25 S61 20, 74 22 S92 17, 106 20 S126 12, 141 16 S161 12, 176 15 S195 8, 211 11 S230 10, 245 13 S263 3, 279 8 S302 1, 320 5" fill="none" stroke="#4d9cff" strokeWidth="1.5" />
         <path d="M0 27 C18 26, 22 22, 37 25 S61 20, 74 22 S92 17, 106 20 S126 12, 141 16 S161 12, 176 15 S195 8, 211 11 S230 10, 245 13 S263 3, 279 8 S302 1, 320 5 V34 H0Z" fill="url(#pulseFade)" opacity=".22" />
         <defs><linearGradient id="pulseFade" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#4d9cff" /><stop offset="1" stopColor="#4d9cff" stopOpacity="0" /></linearGradient></defs>
