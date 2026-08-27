@@ -1,5 +1,5 @@
 import React, { createContext, type PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
-import { loadWidgetPreferences, type WidgetPreferences, widgetPreferencesKey } from '@/src/widgets/preferences';
+import { defaultWidgetPreferences, loadWidgetPreferences, type WidgetPreferences, widgetPreferencesKey } from '@/src/widgets/preferences';
 import { refreshAndroidWidgets } from '@/src/widgets/refresh';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -12,7 +12,7 @@ type WidgetPreferencesContextValue = {
 const WidgetPreferencesContext = createContext<WidgetPreferencesContextValue | null>(null);
 
 export function WidgetPreferencesProvider({ children }: PropsWithChildren) {
-  const [preferences, setPreferences] = useState<WidgetPreferences>({ kind: 'price', size: 'medium', selectedSymbols: ['BTC', 'ETH', 'SOL', 'XRP'] });
+  const [preferences, setPreferences] = useState<WidgetPreferences>(defaultWidgetPreferences);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
