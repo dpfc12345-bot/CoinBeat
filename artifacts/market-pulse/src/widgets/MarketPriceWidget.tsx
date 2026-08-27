@@ -40,21 +40,28 @@ export function MarketPriceWidget({
       <FlexWidget style={{ flexDirection: 'column', flexGap: 8 }}>
         {assetRows.map((row, index) => (
           <FlexWidget key={`${index}-${row[0]?.symbol ?? 'row'}`} style={{ flexDirection: columns === 2 ? 'row' : 'column', flexGap: 8 }}>
-            {row.map((asset) => (
-              <FlexWidget
-                key={asset.symbol}
-                clickAction="OPEN_URI"
-                clickActionData={{ uri: `market-pulse://coin/${asset.symbol}` }}
-                accessibilityLabel={`${asset.name} 상세 보기`}
-                style={{ flex: 1, backgroundColor: theme.surface, borderRadius: 13, padding: 10, flexDirection: 'column', flexGap: 5 }}
-              >
-                <FlexWidget style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <TextWidget text={asset.symbol} style={{ color: theme.foreground, fontSize: f(13), fontWeight: '700' }} />
-                  <TextWidget text={`${asset.change24h >= 0 ? '+' : ''}${asset.change24h.toFixed(2)}%`} style={{ color: asset.change24h >= 0 ? theme.positive : theme.negative, fontSize: f(10), fontWeight: '700' }} />
+            {Array.from({ length: columns }, (_, slot) => row[slot]).map((asset, slot) => {
+              if (!asset) {
+                // Keep an invisible spacer so a partially-filled last row still lines up
+                // with the column grid above it instead of stretching to full width.
+                return <FlexWidget key={`empty-${slot}`} style={{ flex: 1 }} />;
+              }
+              return (
+                <FlexWidget
+                  key={asset.symbol}
+                  clickAction="OPEN_URI"
+                  clickActionData={{ uri: `market-pulse://coin/${asset.symbol}` }}
+                  accessibilityLabel={`${asset.name} 상세 보기`}
+                  style={{ flex: 1, backgroundColor: theme.surface, borderRadius: 13, padding: 10, flexDirection: 'column', flexGap: 5 }}
+                >
+                  <FlexWidget style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <TextWidget text={asset.symbol} style={{ color: theme.foreground, fontSize: f(13), fontWeight: '700' }} />
+                    <TextWidget text={`${asset.change24h >= 0 ? '+' : ''}${asset.change24h.toFixed(2)}%`} style={{ color: asset.change24h >= 0 ? theme.positive : theme.negative, fontSize: f(10), fontWeight: '700' }} />
+                  </FlexWidget>
+                  <TextWidget text={formatPrice(asset.price)} style={{ color: theme.foreground, fontSize: f(16), fontWeight: '700' }} />
                 </FlexWidget>
-                <TextWidget text={formatPrice(asset.price)} style={{ color: theme.foreground, fontSize: f(16), fontWeight: '700' }} />
-              </FlexWidget>
-            ))}
+              );
+            })}
           </FlexWidget>
         ))}
       </FlexWidget>
