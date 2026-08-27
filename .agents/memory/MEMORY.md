@@ -4,3 +4,4 @@
 - [Development API routing](development-api-routing.md) — Expo development builds must prefer the Replit dev API over a configured production URL.
 - [Live notification cadence](live-notification-cadence.md) — Keep persistent market notifications quiet and slower than foreground market refreshes.
 - [Android widget compiler exclusion](android-widget-compiler-exclusion.md) — Widget JSX must opt out of React Compiler or Android can add a blank widget despite successful API calls.
+- [Widget background fetch resilience](widget-background-fetch-resilience.md) — Background widget data fetches need timeout+retry and a last-known-good cache, or transient network gaps show a permanent error placeholder.
