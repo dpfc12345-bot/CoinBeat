@@ -51,9 +51,7 @@ export default function HomeScreen() {
     {snapshot && <SentimentCard score={snapshot.sentiment.score} label={snapshot.sentiment.label} change={snapshot.sentiment.change} />}
     <View style={[styles.marketTape, { borderTopColor: colors.border }]}>
       <Text style={[styles.tapeLabel, { color: colors.mutedForeground }]}>시장 요약</Text>
-      <Text style={[styles.tapeValue, { color: colors.foreground }]}>시총 {snapshot?.totalMarketCap ?? '불러오는 중'}</Text>
       <Text style={[styles.tapeValue, { color: colors.foreground }]}>거래량 {snapshot?.totalVolume ?? '불러오는 중'}</Text>
-      <Text style={[styles.tapeValue, { color: colors.primary }]}>BTC 비중 {snapshot?.btcDominance ?? '불러오는 중'}</Text>
     </View>
   </Screen>;
 }

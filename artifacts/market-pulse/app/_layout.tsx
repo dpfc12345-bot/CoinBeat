@@ -20,6 +20,7 @@ import { WidgetPreferencesProvider } from '@/src/context/WidgetPreferencesContex
 import { refreshAndroidWidgets } from '@/src/widgets/refresh';
 import { getApiBaseUrl, MARKET_REFRESH_INTERVAL_MS } from '@/src/config/api';
 import { LIVE_NOTIFICATION_REFRESH_INTERVAL_MS, isLiveNotificationEnabled, refreshLiveNotification } from '@/src/notifications/liveNotification';
+import { checkPriceAlerts } from '@/src/notifications/priceAlerts';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -69,20 +70,31 @@ export default function RootLayout() {
         // Keep the last notification visible if the latest refresh fails.
       }
     };
+    const syncPriceAlerts = async () => {
+      try {
+        await checkPriceAlerts();
+      } catch {
+        // Skip this cycle and retry on the next refresh tick.
+      }
+    };
     void syncWidgets();
     void syncLiveNotification();
+    void syncPriceAlerts();
     const subscription = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
         void syncWidgets();
         void syncLiveNotification();
+        void syncPriceAlerts();
       }
     });
     const widgetInterval = setInterval(() => void syncWidgets(), MARKET_REFRESH_INTERVAL_MS);
     const notificationInterval = setInterval(() => void syncLiveNotification(), LIVE_NOTIFICATION_REFRESH_INTERVAL_MS);
+    const priceAlertInterval = setInterval(() => void syncPriceAlerts(), MARKET_REFRESH_INTERVAL_MS);
     return () => {
       subscription.remove();
       clearInterval(widgetInterval);
       clearInterval(notificationInterval);
+      clearInterval(priceAlertInterval);
     };
   }, []);
 
