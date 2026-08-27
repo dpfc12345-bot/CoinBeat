@@ -190,13 +190,14 @@ export default function WidgetsScreen() {
       </Pressable>)}
     </View>
 
-    <Text style={[styles.label, { color: colors.mutedForeground }]}>미리보기 크기</Text>
+    <Text style={[styles.label, { color: colors.mutedForeground }]}>미리보기 크기 (참고용)</Text>
     <View style={styles.sizeRow}>
       {(['small', 'medium', 'large'] as WidgetSize[]).map((itemSize) => <Pressable key={itemSize} testID={`widget-size-${itemSize}`} onPress={() => { setPreviewSize(itemSize); setSaved(false); }} style={[styles.sizeControl, { borderColor: size === itemSize ? colors.primary : colors.border, backgroundColor: size === itemSize ? colors.secondary : colors.card }]}>
         <Text style={[styles.sizeText, { color: size === itemSize ? colors.foreground : colors.mutedForeground }]}>{sizeLabels[itemSize]}</Text>
         <Text style={[styles.sizeMeasure, { color: size === itemSize ? colors.primary : colors.mutedForeground }]}>{itemSize === 'small' ? '2 × 1' : itemSize === 'medium' ? '4 × 2' : '4 × 4'}</Text>
       </Pressable>)}
     </View>
+    <Text style={[styles.coinHint, { color: colors.mutedForeground, marginTop: -14 }]}>실제 홈 화면 위젯의 크기는 안드로이드 정책상 앱에서 바꿀 수 없어요. 홈 화면에서 위젯을 길게 눌러 모서리를 드래그하면 크기가 바뀌고, 내용은 그 크기에 맞춰 자동으로 조정돼요.</Text>
 
     <Text style={[styles.label, { color: colors.mutedForeground }]}>미리보기</Text>
     <View style={[styles.previewWell, { borderColor: colors.border, backgroundColor: colors.muted }]}>
