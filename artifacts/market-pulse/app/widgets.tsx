@@ -90,7 +90,7 @@ export default function WidgetsScreen() {
 
   return <Screen>
     <View style={styles.header}>
-      <Pressable testID="widget-back" onPress={() => router.back()} style={[styles.back, { borderColor: colors.border, backgroundColor: colors.card }]}>
+      <Pressable testID="widget-back" onPress={() => { if (router.canGoBack()) router.back(); else router.replace('/'); }} style={[styles.back, { borderColor: colors.border, backgroundColor: colors.card }]}>
         <Ionicons name="arrow-back" size={18} color={colors.foreground} />
       </Pressable>
       <View style={styles.headerCopy}>

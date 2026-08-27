@@ -63,7 +63,7 @@ export default function NewsDetailScreen() {
 
 function BackButton() {
   const colors = useColors();
-  return <Pressable testID="news-back" onPress={() => router.back()} style={styles.back}>
+  return <Pressable testID="news-back" onPress={() => { if (router.canGoBack()) router.back(); else router.replace('/'); }} style={styles.back}>
     <Ionicons name="arrow-back" size={20} color={colors.foreground} />
     <Text style={[styles.backText, { color: colors.foreground }]}>뉴스로 돌아가기</Text>
   </Pressable>;
