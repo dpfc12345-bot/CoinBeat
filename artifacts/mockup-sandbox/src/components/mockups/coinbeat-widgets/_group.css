@@ -1,0 +1,33 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap");
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #05070e;
+}
+
+.coinbeat-preview {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 18px;
+  color: #f4f7ff;
+  font-family: "Manrope", system-ui, sans-serif;
+}
+
+.coinbeat-preview * {
+  box-sizing: border-box;
+}
+
+.mono {
+  font-family: "DM Mono", ui-monospace, monospace;
+}
+
+.noise {
+  background-image: radial-gradient(rgba(255,255,255,.045) .7px, transparent .7px);
+  background-size: 5px 5px;
+}
