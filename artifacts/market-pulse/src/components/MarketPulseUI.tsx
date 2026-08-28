@@ -13,9 +13,23 @@ export const formatCategory = (category: string) => ({ MARKET: '시장', ETF: 'E
 
 const shadow = (color: string, opacity: number, radius: number, y: number) => ({ boxShadow: `0px ${y}px ${radius}px rgba(0,0,0,${opacity})`, elevation: Math.round(radius / 3) } as const);
 
-/** Small waveform mark shared by the header logo and empty/loading states — the app's signature "pulse". */
-export function PulseMark({ color, width = 22, height = 14 }: { color: string; width?: number; height?: number }) {
-  return <Svg width={width} height={height} viewBox="0 0 44 28"><Path d="M0 14H8L13 4L20 24L26 10L30 18L34 14H44" fill="none" stroke={color} strokeWidth={3.4} strokeLinecap="round" strokeLinejoin="round" /></Svg>;
+/** Rising-bars + pulse mark shared by the header logo, app icon, and empty/loading states — CoinBeat's signature symbol. */
+export function PulseMark({ color, accentColor, width = 22, height = 22 }: { color: string; accentColor?: string; width?: number; height?: number }) {
+  const wave = accentColor ?? color;
+  return (
+    <Svg width={width} height={height} viewBox="0 0 34 32">
+      <Defs>
+        <LinearGradient id="pulseMarkBars" x1="0" y1="1" x2="0" y2="0">
+          <Stop offset="0" stopColor={color} stopOpacity={0.75} />
+          <Stop offset="1" stopColor={color} />
+        </LinearGradient>
+      </Defs>
+      <Path d="M3 24a2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5v3.5a2.5 2.5 0 0 1-2.5 2.5A2.5 2.5 0 0 1 3 27.5z" fill="url(#pulseMarkBars)" />
+      <Path d="M11 17a2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5v10.5a2.5 2.5 0 0 1-2.5 2.5A2.5 2.5 0 0 1 11 27.5z" fill="url(#pulseMarkBars)" />
+      <Path d="M19 10a2.5 2.5 0 0 1 2.5-2.5A2.5 2.5 0 0 1 24 10v17.5a2.5 2.5 0 0 1-2.5 2.5A2.5 2.5 0 0 1 19 27.5z" fill="url(#pulseMarkBars)" />
+      <Path d="M18 15L22 7L26 21L30 11" fill="none" stroke={wave} strokeWidth={2.8} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
 }
 
 export function ScreenHeader({ eyebrow, title, onPress }: { eyebrow: string; title: string; onPress?: () => void }) {
@@ -23,7 +37,7 @@ export function ScreenHeader({ eyebrow, title, onPress }: { eyebrow: string; tit
   return (
     <View style={styles.header}>
       <View style={styles.headerLeft}>
-        <View style={[styles.brandMark, { backgroundColor: colors.secondary }]}><PulseMark color={colors.primary} width={20} height={13} /></View>
+        <View style={[styles.brandMark, { backgroundColor: colors.secondary }]}><PulseMark color={colors.primary} accentColor={colors.accent} width={22} height={22} /></View>
         <View>
           <Text style={[styles.eyebrow, { color: colors.mutedForeground }]}>{eyebrow}</Text>
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>{title}</Text>
