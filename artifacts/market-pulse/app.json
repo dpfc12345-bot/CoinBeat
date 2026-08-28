@@ -17,7 +17,11 @@
       "supportsTablet": false
     },
     "android": {
-      "package": "com.marketpulse.app"
+      "package": "com.marketpulse.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon-adaptive-foreground.png",
+        "backgroundColor": "#05070E"
+      }
     },
     "web": {
       "favicon": "./assets/images/icon.png"
