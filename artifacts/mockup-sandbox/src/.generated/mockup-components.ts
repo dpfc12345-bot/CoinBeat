@@ -7,10 +7,11 @@ export const modules: ModuleMap = {
   "./components/mockups/coinbeat-widgets/PulseBeacon.tsx": () => import("../components/mockups/coinbeat-widgets/PulseBeacon.tsx"),
   "./components/mockups/coinbeat-widgets/SignalStack.tsx": () => import("../components/mockups/coinbeat-widgets/SignalStack.tsx"),
   "./components/mockups/coinbeat-widgets/TickerWindow.tsx": () => import("../components/mockups/coinbeat-widgets/TickerWindow.tsx"),
+  "./components/mockups/coinbeat-widgets/WidgetConfigurator.tsx": () => import("../components/mockups/coinbeat-widgets/WidgetConfigurator.tsx"),
+  "./components/mockups/widget-studio/Studio.tsx": () => import("../components/mockups/widget-studio/Studio.tsx"),
   "./components/mockups/news-impact-widget/BreakingAlert.tsx": () => import("../components/mockups/news-impact-widget/BreakingAlert.tsx"),
   "./components/mockups/news-impact-widget/Current.tsx": () => import("../components/mockups/news-impact-widget/Current.tsx"),
   "./components/mockups/news-impact-widget/LargeImpact.tsx": () => import("../components/mockups/news-impact-widget/LargeImpact.tsx"),
   "./components/mockups/news-impact-widget/MediumTicker.tsx": () => import("../components/mockups/news-impact-widget/MediumTicker.tsx"),
-  "./components/mockups/news-impact-widget/SmallGlance.tsx": () => import("../components/mockups/news-impact-widget/SmallGlance.tsx"),
-  "./components/mockups/widget-studio/Studio.tsx": () => import("../components/mockups/widget-studio/Studio.tsx")
+  "./components/mockups/news-impact-widget/SmallGlance.tsx": () => import("../components/mockups/news-impact-widget/SmallGlance.tsx")
 };
