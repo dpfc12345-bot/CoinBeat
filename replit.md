@@ -40,6 +40,8 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 _Populate as you build — sharp edges, "always run X before Y" rules._
 
+- Any future third-party API key (e.g. Coinness) must be added via Replit Secrets and used only from `artifacts/api-server` — never called directly from the Expo client. Route the call through `artifacts/api-server/src/lib/externalFetch.ts`'s `fetchExternal` (enforced timeout) and return errors to clients via `sendExternalDataError`-style sanitization (log full detail server-side with `logger`, never echo upstream error text/URLs to the client). `/api` already has `helmet()` and a 120 req/min per-IP rate limiter in `app.ts` to protect quota-limited upstreams.
+
 ## Pointers
 
 - See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details

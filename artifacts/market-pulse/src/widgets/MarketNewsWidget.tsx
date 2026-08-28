@@ -23,11 +23,11 @@ export function MarketNewsWidget({
     <FlexWidget
       clickAction="OPEN_URI"
       clickActionData={{ uri: 'market-pulse://widgets' }}
-      accessibilityLabel="Market Pulse 최신 암호화폐 뉴스"
+      accessibilityLabel="CoinBeat 최신 암호화폐 뉴스"
       style={{ backgroundColor: theme.background, borderRadius: 22, padding: 16, flexDirection: 'column', flexGap: 8 }}
     >
       <FlexWidget style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <TextWidget text="MARKET PULSE NEWS" style={{ color: theme.foreground, fontSize: f(13), fontWeight: '700' }} />
+        <TextWidget text="COINBEAT NEWS" style={{ color: theme.foreground, fontSize: f(13), fontWeight: '700' }} />
         <TextWidget text="블록미디어 RSS" style={{ color: theme.primary, fontSize: f(10), fontWeight: '700' }} />
       </FlexWidget>
       {items.slice(0, count).map((item) => (

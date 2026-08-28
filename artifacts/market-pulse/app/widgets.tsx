@@ -94,7 +94,7 @@ export default function WidgetsScreen() {
         <Ionicons name="arrow-back" size={18} color={colors.foreground} />
       </Pressable>
       <View style={styles.headerCopy}>
-        <Text style={[styles.eyebrow, { color: colors.primary }]}>MARKET PULSE WIDGETS</Text>
+        <Text style={[styles.eyebrow, { color: colors.primary }]}>COINBEAT WIDGETS</Text>
         <Text style={[styles.title, { color: colors.foreground }]}>홈 화면 위젯</Text>
       </View>
     </View>
@@ -217,7 +217,7 @@ export default function WidgetsScreen() {
       <Ionicons name={saved ? 'checkmark' : 'add'} size={18} color={colors.primaryForeground} />
       <Text style={[styles.saveText, { color: colors.primaryForeground }]}>{saved ? '홈 화면 위젯을 새로고침했어요' : '홈 화면 위젯 새로고침'}</Text>
     </Pressable>
-    {saved && <Text style={[styles.savedNote, { color: colors.positive }]}>홈 화면을 길게 누른 뒤 위젯에서 Market Pulse를 선택해 추가하세요. 앱이 열려 있을 때는 15초마다 갱신되며, Android의 백그라운드 자동 갱신은 최소 30분입니다.</Text>}
+    {saved && <Text style={[styles.savedNote, { color: colors.positive }]}>홈 화면을 길게 누른 뒤 위젯에서 CoinBeat를 선택해 추가하세요. 앱이 열려 있을 때는 15초마다 갱신되며, Android의 백그라운드 자동 갱신은 최소 30분입니다.</Text>}
   </Screen>;
 }
 

@@ -39,7 +39,7 @@ export default function NewsDetailScreen() {
     <Text style={[styles.time, { color: colors.mutedForeground }]}>{item.relativeTime} · {item.source}</Text>
     <Text style={[styles.title, { color: colors.foreground }]}>{item.title}</Text>
     <Text style={[styles.body, { color: colors.secondaryForeground }]}>{item.content}</Text>
-    {asset ? <View style={[styles.reaction, { borderColor: colors.border, backgroundColor: colors.card }]}>
+    {asset ? <View style={[styles.reaction, { backgroundColor: colors.cardElevated }]}>
       <View style={styles.reactionHead}>
         <View>
           <Text style={[styles.kicker, { color: colors.mutedForeground }]}>시장 반응</Text>
@@ -53,7 +53,7 @@ export default function NewsDetailScreen() {
         <Reaction label="현재" value={formatPrice(asset.price)} change={item.priceChange} color={changeColor} />
       </View>
       <Sparkline points={asset.sparkline} color={changeColor} width={300} height={80} />
-    </View> : <View style={[styles.reaction, { borderColor: colors.border, backgroundColor: colors.card }]}><Text style={[styles.kicker, { color: colors.mutedForeground }]}>시장 반응</Text><Text style={[styles.stateCopy, { color: assetQuery.isError ? colors.negative : colors.mutedForeground }]}>실시간 시세를 {assetQuery.isError ? '불러오지 못했어요.' : '불러오는 중이에요.'}</Text></View>}
+    </View> : <View style={[styles.reaction, { backgroundColor: colors.cardElevated }]}><Text style={[styles.kicker, { color: colors.mutedForeground }]}>시장 반응</Text><Text style={[styles.stateCopy, { color: assetQuery.isError ? colors.negative : colors.mutedForeground }]}>실시간 시세를 {assetQuery.isError ? '불러오지 못했어요.' : '불러오는 중이에요.'}</Text></View>}
     <View style={[styles.scoreRow, { borderTopColor: colors.border }]}>
       <Text style={[styles.kicker, { color: colors.mutedForeground }]}>뉴스 영향도 점수</Text>
       <Text style={[styles.score, { color: colors.primary }]}>{item.impactScore}<Text style={[styles.scoreOutOf, { color: colors.mutedForeground }]}> / 100</Text></Text>
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   time: { fontFamily: 'Inter_500Medium', fontSize: 11, marginTop: 7 },
   title: { fontFamily: 'Inter_700Bold', fontSize: 30, lineHeight: 36, letterSpacing: -1.1, marginTop: 18 },
   body: { fontFamily: 'Inter_400Regular', fontSize: 15, lineHeight: 23, marginTop: 19 },
-  reaction: { borderWidth: 1, borderRadius: 16, padding: 16, marginTop: 28 },
+  reaction: { borderRadius: 22, padding: 18, marginTop: 28, boxShadow: '0px 8px 22px rgba(0,0,0,0.3)' },
   reactionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   kicker: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 1.3 },
   assetName: { fontFamily: 'Inter_700Bold', fontSize: 20, marginTop: 8 },

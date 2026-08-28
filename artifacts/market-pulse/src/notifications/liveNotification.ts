@@ -46,7 +46,7 @@ type LiveNotificationResult =
 async function ensureChannel() {
   if (Platform.OS !== 'android') return;
   await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
-    name: 'Market Pulse 실시간 알림',
+    name: 'CoinBeat 실시간 알림',
     description: '시세와 최신 뉴스가 표시되는 고정 알림',
     importance: AndroidImportance.DEFAULT,
     lockscreenVisibility: AndroidNotificationVisibility.PUBLIC,
@@ -79,7 +79,7 @@ async function getLiveCopy() {
     .join('  ·  ');
   const headline = news[0]?.title ?? '새로운 뉴스가 없습니다.';
   return {
-    title: 'Market Pulse · 실시간',
+    title: 'CoinBeat · 실시간',
     body: `${prices || '시세를 불러오는 중입니다.'}\n${headline}`,
   };
 }
@@ -144,7 +144,7 @@ export async function enableLiveNotification(): Promise<LiveNotificationResult> 
     await showLiveNotification(copy.title, copy.body);
   } catch {
     await showLiveNotification(
-      'Market Pulse',
+      'CoinBeat',
       '알림이 켜졌습니다. 앱을 열면 최신 시세와 뉴스를 확인할 수 있습니다.',
     );
   }

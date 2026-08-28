@@ -23,7 +23,7 @@ type MarketData = {
 async function ensureChannel() {
   if (Platform.OS !== 'android') return;
   await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
-    name: 'Market Pulse 가격 알림',
+    name: 'CoinBeat 가격 알림',
     description: '설정한 목표가에 도달하면 알려줍니다',
     importance: Notifications.AndroidImportance.HIGH,
   });

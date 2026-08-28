@@ -54,10 +54,10 @@ function ClassicTabLayout() {
         headerShown: false,
         tabBarStyle: {
           position: 'absolute',
-          backgroundColor: isIOS ? 'transparent' : colors.background,
-          borderTopWidth: isWeb ? 1 : 0,
-          borderTopColor: colors.border,
+          backgroundColor: isIOS ? 'transparent' : colors.card,
+          borderTopWidth: 0,
           elevation: 0,
+          boxShadow: isWeb ? '0px -6px 20px rgba(0,0,0,0.3)' : undefined,
           ...(isWeb ? { height: 84 } : {}),
         },
         tabBarBackground: () =>

@@ -40,7 +40,7 @@ export default function WatchlistScreen() {
       {isLoading || marketQuery.isLoading ? (
         <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>관심목록을 불러오는 중…</Text>
       ) : assets.length === 0 ? (
-        <View style={[styles.empty, { borderColor: colors.border, backgroundColor: colors.card }]}>
+        <View style={[styles.empty, { backgroundColor: colors.card }]}>
           <Ionicons name="star-outline" size={28} color={colors.primary} />
           <Text style={[styles.emptyTitle, { color: colors.foreground }]}>{marketQuery.isError ? '실시간 시세를 불러오지 못했습니다' : '관심목록이 비어 있습니다'}</Text>
           <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>{marketQuery.isError ? 'API 연결을 확인한 뒤 다시 시도하세요.' : '아래 검색창에서 코인을 추가해보세요.'}</Text>
@@ -52,7 +52,7 @@ export default function WatchlistScreen() {
               key={asset.symbol}
               testID={`watchlist-row-${asset.symbol}`}
               onPress={() => router.push(`/coin/${asset.symbol}`)}
-              style={[styles.row, { borderColor: colors.border, backgroundColor: colors.card }]}
+              style={[styles.row, { backgroundColor: colors.card }]}
             >
               <View style={styles.asset}>
                 <View style={[styles.assetDot, { backgroundColor: asset.accent }]} />
@@ -72,7 +72,7 @@ export default function WatchlistScreen() {
       )}
 
       <SectionHeading label="코인 추가" action={`${allAssets.length}개 KRW 마켓`} />
-      <View style={[styles.searchBox, { borderColor: colors.border, backgroundColor: colors.card }]}>
+      <View style={[styles.searchBox, { backgroundColor: colors.card }]}>
         <Ionicons name="search" size={17} color={colors.mutedForeground} />
         <TextInput
           testID="watchlist-search"
@@ -97,7 +97,7 @@ export default function WatchlistScreen() {
       {marketQuery.isError ? (
         <Text style={[styles.errorText, { color: colors.negative }]}>전체 코인 목록을 불러오지 못했습니다. 잠시 후 다시 시도하세요.</Text>
       ) : searchResults.length === 0 && !marketQuery.isLoading ? (
-        <View style={[styles.noResults, { borderColor: colors.border, backgroundColor: colors.card }]}>
+        <View style={[styles.noResults, { backgroundColor: colors.card }]}>
           <Ionicons name="search-outline" size={22} color={colors.mutedForeground} />
           <Text style={[styles.noResultsText, { color: colors.mutedForeground }]}>일치하는 코인이 없습니다.</Text>
         </View>
@@ -125,7 +125,7 @@ export default function WatchlistScreen() {
 const styles = StyleSheet.create({
   intro: { fontFamily: 'Inter_500Medium', fontSize: 13, lineHeight: 19, maxWidth: 320 },
   list: { gap: 9 },
-  row: { minHeight: 76, borderWidth: 1, borderRadius: 9, padding: 14, flexDirection: 'row', alignItems: 'center' },
+  row: { minHeight: 76, borderRadius: 18, padding: 14, flexDirection: 'row', alignItems: 'center', boxShadow: '0px 6px 16px rgba(0,0,0,0.24)' },
   asset: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 },
   assetDot: { width: 9, height: 9, borderRadius: 5 },
   symbol: { fontFamily: 'Inter_700Bold', fontSize: 15 },
@@ -134,16 +134,16 @@ const styles = StyleSheet.create({
   priceBlock: { alignItems: 'flex-end', marginRight: 11 },
   price: { fontFamily: 'Inter_700Bold', fontSize: 14 },
   change: { fontFamily: 'Inter_700Bold', fontSize: 11, marginTop: 4 },
-  empty: { minHeight: 190, borderWidth: 1, borderRadius: 10, alignItems: 'center', justifyContent: 'center', padding: 28 },
+  empty: { minHeight: 190, borderRadius: 20, alignItems: 'center', justifyContent: 'center', padding: 28, boxShadow: '0px 6px 16px rgba(0,0,0,0.24)' },
   emptyTitle: { fontFamily: 'Inter_700Bold', fontSize: 17, marginTop: 14 },
   emptyText: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 18, textAlign: 'center', marginTop: 7 },
-  searchBox: { minHeight: 48, borderWidth: 1, borderRadius: 13, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 13, gap: 9 },
+  searchBox: { minHeight: 48, borderRadius: 16, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, gap: 9, boxShadow: '0px 4px 12px rgba(0,0,0,0.24)' },
   searchInput: { flex: 1, fontFamily: 'Inter_500Medium', fontSize: 13, paddingVertical: 11 },
   helper: { fontFamily: 'Inter_500Medium', fontSize: 11, lineHeight: 17, marginTop: 9 },
   errorText: { fontFamily: 'Inter_600SemiBold', fontSize: 12, lineHeight: 18, marginTop: 15 },
   addList: { marginTop: 10 },
   addRow: { minHeight: 61, borderBottomWidth: 1, flexDirection: 'row', alignItems: 'center', paddingVertical: 9 },
   resultPrice: { fontFamily: 'Inter_500Medium', fontSize: 10, marginRight: 10 },
-  noResults: { minHeight: 92, borderWidth: 1, borderRadius: 12, alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 12 },
+  noResults: { minHeight: 92, borderRadius: 18, alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 12, boxShadow: '0px 4px 12px rgba(0,0,0,0.24)' },
   noResultsText: { fontFamily: 'Inter_500Medium', fontSize: 12 },
 });

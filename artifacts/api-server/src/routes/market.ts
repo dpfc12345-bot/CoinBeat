@@ -1,5 +1,7 @@
 import { Router, type IRouter } from "express";
 import { createHash } from "node:crypto";
+import { fetchExternal } from "../lib/externalFetch";
+import { logger } from "../lib/logger";
 import {
   GetBreakingNewsResponse,
   GetMarketAssetParams,
@@ -104,7 +106,7 @@ async function getLiveAssets(): Promise<LiveAsset[]> {
 async function loadLiveAssets(): Promise<LiveAsset[]> {
   const marketResponse = cachedMarkets && cachedMarkets.expiresAt > Date.now()
     ? undefined
-    : await fetch("https://api.upbit.com/v1/market/all?isDetails=false");
+    : await fetchExternal("https://api.upbit.com/v1/market/all?isDetails=false");
   if (marketResponse && !marketResponse.ok) {
     throw new Error(`Upbit 마켓 목록을 불러오지 못했습니다 (${marketResponse.status}).`);
   }
@@ -117,7 +119,7 @@ async function loadLiveAssets(): Promise<LiveAsset[]> {
   const marketChunks = Array.from({ length: Math.ceil(markets.length / 100) }, (_, index) => markets.slice(index * 100, (index + 1) * 100));
   const tickerChunks = await Promise.all(marketChunks.map(async (marketChunk) => {
     const marketList = marketChunk.map((market) => market.market).join(",");
-    const tickerResponse = await fetch(`https://api.upbit.com/v1/ticker?markets=${encodeURIComponent(marketList)}`);
+    const tickerResponse = await fetchExternal(`https://api.upbit.com/v1/ticker?markets=${encodeURIComponent(marketList)}`);
     if (!tickerResponse.ok) throw new Error(`Upbit 시세를 불러오지 못했습니다 (${tickerResponse.status}).`);
     return tickerResponse.json() as Promise<UpbitTicker[]>;
   }));
@@ -164,7 +166,7 @@ async function loadLiveAssets(): Promise<LiveAsset[]> {
 async function getLiveNews(): Promise<LiveNewsItem[]> {
   if (cachedNews && cachedNews.expiresAt > Date.now()) return cachedNews.value;
 
-  const response = await fetch("https://www.blockmedia.co.kr/feed", {
+  const response = await fetchExternal("https://www.blockmedia.co.kr/feed", {
     headers: { Accept: "application/rss+xml, application/xml, text/xml" },
   });
   if (!response.ok) throw new Error(`블록미디어 뉴스를 불러오지 못했습니다 (${response.status}).`);
@@ -226,8 +228,15 @@ async function getLiveNews(): Promise<LiveNewsItem[]> {
 }
 
 function sendExternalDataError(res: Parameters<Parameters<IRouter["get"]>[1]>[1], error: unknown) {
+  // Log full detail server-side only. Never forward it to the client: upstream
+  // error text can include request URLs, hostnames, or (for API-key-protected
+  // providers) query strings that must not leak to callers of this API.
+  logger.error({ err: error }, "Failed to serve market data");
   const message = error instanceof Error ? error.message : "외부 시장 데이터를 불러오지 못했습니다.";
-  res.status(502).json({ message });
+  const safeMessage = /^https?:\/\//i.test(message) || message.includes("key") || message.includes("token")
+    ? "외부 시장 데이터를 불러오지 못했습니다."
+    : message;
+  res.status(502).json({ message: safeMessage });
 }
 
 router.get("/news", async (_req, res): Promise<void> => {

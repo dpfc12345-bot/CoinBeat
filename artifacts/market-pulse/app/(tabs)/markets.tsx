@@ -22,7 +22,7 @@ export default function MarketsScreen() {
   return <Screen>
     <ScreenHeader eyebrow="UPBIT KRW 실시간" title="시장" onPress={() => router.push('/settings')} />
     <View style={styles.stats}><Stat label="24시간 거래량" value={snapshot?.totalVolume ?? '불러오는 중'} /></View>
-    <View style={[styles.searchBox, { borderColor: colors.border, backgroundColor: colors.card }]}>
+    <View style={[styles.searchBox, { backgroundColor: colors.card }]}>
       <Ionicons name="search" size={15} color={colors.mutedForeground} />
       <TextInput testID="market-search" value={query} onChangeText={setQuery} placeholder="코인 이름 또는 심볼 검색" placeholderTextColor={colors.mutedForeground} style={[styles.searchInput, { color: colors.foreground }]} />
       {query.length > 0 && <Pressable testID="market-search-clear" onPress={() => setQuery('')}><Ionicons name="close-circle" size={16} color={colors.mutedForeground} /></Pressable>}
@@ -43,10 +43,10 @@ export default function MarketsScreen() {
 function Stat({ label, value }: { label: string; value: string }) { const colors = useColors(); return <View style={[styles.stat, { backgroundColor: colors.card }]}><Text style={[styles.statLabel, { color: colors.mutedForeground }]}>{label}</Text><Text style={[styles.statValue, { color: colors.foreground }]}>{value}</Text></View>; }
 const styles = StyleSheet.create({
   stats: { flexDirection: 'row', gap: 8, marginBottom: 12 },
-  stat: { flex: 1, padding: 10, borderRadius: 7 },
-  statLabel: { fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.8 },
-  statValue: { fontFamily: 'Inter_700Bold', fontSize: 15, marginTop: 7 },
-  searchBox: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 4 },
+  stat: { flex: 1, padding: 14, borderRadius: 16, boxShadow: '0px 4px 12px rgba(0,0,0,0.24)' },
+  statLabel: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.8 },
+  statValue: { fontFamily: 'Inter_700Bold', fontSize: 17, marginTop: 8, fontVariant: ['tabular-nums'] },
+  searchBox: { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 14, paddingHorizontal: 13, paddingVertical: 12, marginBottom: 4, boxShadow: '0px 4px 12px rgba(0,0,0,0.24)' },
   searchInput: { flex: 1, fontFamily: 'Inter_500Medium', fontSize: 13 },
   emptyHint: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 18, marginBottom: 16 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 9 },

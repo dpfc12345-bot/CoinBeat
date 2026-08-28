@@ -16,29 +16,32 @@ export default function HomeScreen() {
   const news = newsQuery.data ?? [];
   const leadNews = news[0];
   return <Screen>
-    <ScreenHeader eyebrow="UPBIT · 블록미디어" title="Market Pulse" onPress={() => router.push('/settings')} />
+    <ScreenHeader eyebrow="UPBIT · 블록미디어" title="CoinBeat" onPress={() => router.push('/settings')} />
     <View style={styles.utilityRow}>
-      <View style={[styles.status, { backgroundColor: colors.muted, borderColor: colors.border }]}>
-        <View style={[styles.statusDot, { backgroundColor: colors.positive }]} />
-       <Text style={[styles.statusText, { color: colors.mutedForeground }]}>Upbit 실시간 · 15초마다 갱신</Text>
+      <View style={[styles.status, { backgroundColor: colors.card }]}>
+        <View style={styles.pulseDotWrap}><View style={[styles.statusDot, { backgroundColor: colors.positive }]} /></View>
+        <Text style={[styles.statusText, { color: colors.mutedForeground }]}>Upbit 실시간 · 15초마다 갱신</Text>
       </View>
-      <Pressable testID="widget-launcher" onPress={() => router.push('/widgets')} style={({ pressed }) => [styles.widgetButton, { borderColor: colors.border, backgroundColor: colors.secondary, opacity: pressed ? 0.72 : 1 }]}>
+      <Pressable testID="widget-launcher" onPress={() => router.push('/widgets')} style={({ pressed }) => [styles.widgetButton, { backgroundColor: colors.card, opacity: pressed ? 0.72 : 1 }]}>
         <Ionicons name="grid-outline" size={14} color={colors.primary} />
         <Text style={[styles.widgetButtonText, { color: colors.foreground }]}>위젯</Text>
       </Pressable>
     </View>
-    {leadNews ? <Pressable testID="home-lead-news" onPress={() => router.push(`/news/${leadNews.id}`)} style={({ pressed }) => [styles.hero, { borderColor: colors.border, backgroundColor: colors.card, opacity: pressed ? 0.78 : 1 }]}>
+    {leadNews ? <Pressable testID="home-lead-news" onPress={() => router.push(`/news/${leadNews.id}`)} style={({ pressed }) => [styles.hero, { backgroundColor: colors.cardElevated, opacity: pressed ? 0.9 : 1 }]}>
+      <View style={[styles.heroGlow, { backgroundColor: colors.primary }]} />
       <View style={styles.heroMeta}>
-        <View style={[styles.heroDot, { backgroundColor: colors.primary }]} />
-        <Text style={[styles.heroKicker, { color: colors.primary }]}>지금 읽을 뉴스</Text>
+        <View style={[styles.heroBadge, { backgroundColor: 'rgba(76,141,255,0.16)' }]}>
+          <View style={[styles.heroDot, { backgroundColor: colors.primary }]} />
+          <Text style={[styles.heroKicker, { color: colors.primary }]}>지금 읽을 뉴스</Text>
+        </View>
         <Text style={[styles.heroTime, { color: colors.mutedForeground }]}>{leadNews.relativeTime}</Text>
       </View>
       <Text style={[styles.heroTitle, { color: colors.foreground }]}>{leadNews.title}</Text>
       <View style={styles.heroFooter}>
         <Text style={[styles.heroSource, { color: colors.mutedForeground }]}>{leadNews.source} · {leadNews.relatedSymbols.join(' · ')}</Text>
-        <Ionicons name="arrow-forward" size={16} color={colors.primary} />
+        <View style={[styles.heroArrow, { backgroundColor: colors.primary }]}><Ionicons name="arrow-forward" size={14} color={colors.primaryForeground} /></View>
       </View>
-    </Pressable> : <View style={[styles.hero, { borderColor: colors.border, backgroundColor: colors.card }]}><Text style={[styles.heroTitle, { color: colors.mutedForeground }]}>{newsQuery.isError ? '뉴스 연결을 확인하세요.' : '최신 뉴스를 불러오는 중…'}</Text></View>}
+    </Pressable> : <View style={[styles.hero, { backgroundColor: colors.cardElevated }]}><Text style={[styles.heroTitle, { color: colors.mutedForeground }]}>{newsQuery.isError ? '뉴스 연결을 확인하세요.' : '최신 뉴스를 불러오는 중…'}</Text></View>}
     <SectionHeading label="주요 뉴스" action="전체 보기" onAction={() => router.push('/news')} />
     {news.slice(1, 3).map((item) => <NewsRow key={item.id} item={item} />)}
     <SectionHeading label="시장 한눈에 보기" action="시장" onAction={() => router.push('/markets')} />
@@ -57,23 +60,27 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  utilityRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 },
-  status: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 7, borderRadius: 999, borderWidth: 1 },
+  utilityRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
+  status: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 11, paddingVertical: 8, borderRadius: 999, boxShadow: '0px 4px 10px rgba(0,0,0,0.28)' },
+  pulseDotWrap: { width: 6, height: 6 },
   statusDot: { width: 6, height: 6, borderRadius: 3 },
-  statusText: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 0.7 },
-  widgetButton: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8 },
+  statusText: { fontFamily: 'Inter_600SemiBold', fontSize: 10.5, letterSpacing: 0.2 },
+  widgetButton: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 999, paddingHorizontal: 13, paddingVertical: 9, boxShadow: '0px 4px 10px rgba(0,0,0,0.28)' },
   widgetButtonText: { fontFamily: 'Inter_700Bold', fontSize: 11 },
-  hero: { borderWidth: 1, borderRadius: 20, padding: 18, marginBottom: 2 },
-  heroMeta: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  heroDot: { width: 7, height: 7, borderRadius: 999 },
-  heroKicker: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.8 },
+  hero: { borderRadius: 24, padding: 20, marginBottom: 2, overflow: 'hidden', boxShadow: '0px 10px 28px rgba(0,0,0,0.35)' },
+  heroGlow: { position: 'absolute', top: -60, right: -40, width: 160, height: 160, borderRadius: 80, opacity: 0.14 },
+  heroMeta: { flexDirection: 'row', alignItems: 'center', gap: 9 },
+  heroBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 9, paddingVertical: 4, borderRadius: 999 },
+  heroDot: { width: 6, height: 6, borderRadius: 999 },
+  heroKicker: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.6 },
   heroTime: { fontFamily: 'Inter_500Medium', fontSize: 10, marginLeft: 'auto' },
-  heroTitle: { fontFamily: 'Inter_700Bold', fontSize: 22, lineHeight: 30, letterSpacing: -0.8, marginTop: 14 },
-  heroFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 },
-  heroSource: { fontFamily: 'Inter_500Medium', fontSize: 11 },
+  heroTitle: { fontFamily: 'Inter_700Bold', fontSize: 22, lineHeight: 30, letterSpacing: -0.8, marginTop: 15 },
+  heroFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 18 },
+  heroSource: { fontFamily: 'Inter_500Medium', fontSize: 11, flex: 1, paddingRight: 12 },
+  heroArrow: { width: 30, height: 30, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   horizontalScroll: { marginRight: -18 },
   marketRow: { paddingRight: 18 },
-  marketTape: { marginTop: 26, paddingTop: 14, borderTopWidth: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 14, alignItems: 'center' },
+  marketTape: { marginTop: 28, paddingTop: 16, borderTopWidth: StyleSheet.hairlineWidth, flexDirection: 'row', flexWrap: 'wrap', gap: 14, alignItems: 'center' },
   tapeLabel: { fontFamily: 'Inter_700Bold', fontSize: 9, letterSpacing: 1.3 },
   tapeValue: { fontFamily: 'Inter_600SemiBold', fontSize: 10 },
 });

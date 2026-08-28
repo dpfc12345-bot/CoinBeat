@@ -33,12 +33,12 @@ export default function NewsScreen() {
   return <Screen>
     <ScreenHeader eyebrow="블록미디어 RSS" title="뉴스" onPress={() => router.push('/settings')} />
     <Text style={[styles.intro, { color: colors.mutedForeground }]}>블록미디어가 공개한 최신 암호화폐 헤드라인을 빠르게 확인하세요.</Text>
-    <View style={[styles.searchBox, { borderColor: colors.border, backgroundColor: colors.card }]}>
+    <View style={[styles.searchBox, { backgroundColor: colors.card }]}>
       <Ionicons name="search" size={15} color={colors.mutedForeground} />
       <TextInput testID="news-search" value={query} onChangeText={setQuery} placeholder="뉴스 검색" placeholderTextColor={colors.mutedForeground} style={[styles.searchInput, { color: colors.foreground }]} />
       {query.length > 0 && <Pressable testID="news-search-clear" onPress={() => setQuery('')}><Ionicons name="close-circle" size={16} color={colors.mutedForeground} /></Pressable>}
     </View>
-    <View style={styles.filters}>{filters.map((item) => <Pressable key={item} testID={`news-filter-${item}`} onPress={() => setFilter(item)} style={[styles.filter, { backgroundColor: filter === item ? colors.primary : colors.card, borderColor: filter === item ? colors.primary : colors.border }]}><Text style={[styles.filterText, { color: filter === item ? colors.primaryForeground : colors.mutedForeground }]}>{filterLabel(item)}</Text></Pressable>)}</View>
+    <View style={styles.filters}>{filters.map((item) => <Pressable key={item} testID={`news-filter-${item}`} onPress={() => setFilter(item)} style={[styles.filter, { backgroundColor: filter === item ? colors.primary : colors.card }]}><Text style={[styles.filterText, { color: filter === item ? colors.primaryForeground : colors.mutedForeground }]}>{filterLabel(item)}</Text></Pressable>)}</View>
     {newsQuery.isError && <Text style={{ color: colors.negative, marginBottom: 16 }}>뉴스 RSS 연결을 확인하세요.</Text>}
     {filter === 'WATCHLIST' && watchlistSymbols.length === 0 && <Text style={[styles.emptyHint, { color: colors.mutedForeground }]}>관심목록에 코인을 추가하면 관련 뉴스만 모아볼 수 있어요.</Text>}
     {filtered.length === 0 && !newsQuery.isError && normalizedQuery.length > 0 && <Text style={[styles.emptyHint, { color: colors.mutedForeground }]}>“{query}”에 대한 검색 결과가 없어요.</Text>}
@@ -47,10 +47,10 @@ export default function NewsScreen() {
 }
 const styles = StyleSheet.create({
   intro: { fontFamily: 'Inter_500Medium', fontSize: 13, lineHeight: 19, maxWidth: 330, marginBottom: 18 },
-  searchBox: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 14 },
+  searchBox: { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 14, paddingHorizontal: 13, paddingVertical: 12, marginBottom: 14, boxShadow: '0px 4px 12px rgba(0,0,0,0.24)' },
   searchInput: { flex: 1, fontFamily: 'Inter_500Medium', fontSize: 13 },
   filters: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 18 },
-  filter: { borderWidth: 1, borderRadius: 5, paddingHorizontal: 10, paddingVertical: 7 },
+  filter: { borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8 },
   filterText: { fontFamily: 'Inter_700Bold', fontSize: 10, letterSpacing: 0.5 },
   emptyHint: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 18, marginBottom: 16 },
 });

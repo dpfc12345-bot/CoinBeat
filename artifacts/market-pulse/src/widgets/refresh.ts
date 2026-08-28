@@ -5,7 +5,7 @@ import { renderMarketPulseWidget } from '@/src/widgets/task-handler';
 const widgetNames = ['MarketPrice', 'MarketNews'] as const;
 
 /**
- * Draw every Market Pulse widget already placed on the Android home screen.
+ * Draw every CoinBeat widget already placed on the Android home screen.
  * This runs while the app process is active, which also recovers widgets whose
  * initial background render was delayed by the launcher or WorkManager.
  */

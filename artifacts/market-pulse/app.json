@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Market Pulse",
+    "name": "CoinBeat",
     "slug": "market-pulse",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -38,7 +38,7 @@
           "widgets": [
             {
               "name": "MarketPrice",
-              "label": "Market Pulse 가격",
+              "label": "CoinBeat 가격",
               "description": "선택한 코인의 실시간 Upbit KRW 가격",
               "minWidth": "160dp",
               "minHeight": "110dp",
@@ -51,7 +51,7 @@
             },
             {
               "name": "MarketNews",
-              "label": "Market Pulse 뉴스",
+              "label": "CoinBeat 뉴스",
               "description": "블록미디어 RSS 최신 암호화폐 헤드라인",
               "minWidth": "160dp",
               "minHeight": "150dp",

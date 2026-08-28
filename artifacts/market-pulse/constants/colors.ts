@@ -1,42 +1,39 @@
 /**
- * Semantic design tokens for the mobile app.
+ * "Night Ticker Pulse" — CoinBeat's design language.
  *
- * These tokens mirror the naming conventions used in web artifacts (index.css)
- * so that multi-artifact projects share a cohesive visual identity.
- *
- * Replace the placeholder values below with values that match the project's
- * brand. If a sibling web artifact exists, read its index.css and convert the
- * HSL values to hex so both artifacts use the same palette.
- *
- * To add dark mode, add a `dark` key with the same token names.
- * The useColors() hook will automatically pick it up.
+ * The idea: standing on a trading floor after hours, the room is dark and the
+ * only light comes from a single glowing blue pulse. That pulse (the same
+ * waveform used in the app icon) threads through the UI as the signature
+ * motif. Surfaces are built with soft elevation (shadow), not borders — flat
+ * bordered boxes read as a template; layered depth reads as considered.
  */
 
 const palette = {
-  text: '#F4F7FF',
-  tint: '#4D9CFF',
-  background: '#070D1B',
-  foreground: '#F4F7FF',
-  card: '#0F1A30',
-  cardForeground: '#F4F7FF',
-  primary: '#4D9CFF',
-  primaryForeground: '#061121',
-  secondary: '#14233D',
-  secondaryForeground: '#D8E6FB',
-  muted: '#0B162A',
-  mutedForeground: '#8194B4',
-  accent: '#A9CEFF',
-  accentForeground: '#061121',
-  destructive: '#FF718C',
+  text: '#F2F6FF',
+  tint: '#4C8DFF',
+  background: '#05070E',
+  foreground: '#F2F6FF',
+  card: '#0E1424',
+  cardForeground: '#F2F6FF',
+  cardElevated: '#141C33',
+  primary: '#4C8DFF',
+  primaryForeground: '#03060F',
+  secondary: '#161F38',
+  secondaryForeground: '#BBCCFF',
+  muted: '#0A0E1A',
+  mutedForeground: '#7C89AC',
+  accent: '#7FE3FF',
+  accentForeground: '#03060F',
+  destructive: '#FF5C72',
   destructiveForeground: '#FFFFFF',
-  border: '#243B61',
-  input: '#243B61',
-  positive: '#68D8AB',
-  negative: '#FF8097',
-  amber: '#FFC36B',
-  teal: '#73CFFF',
+  border: '#1B2440',
+  input: '#1B2440',
+  positive: '#38E2A6',
+  negative: '#FF5C72',
+  amber: '#FFB65C',
+  teal: '#57D9E0',
 };
 
-const colors = { light: palette, dark: palette, radius: 16 };
+const colors = { light: palette, dark: palette, radius: 20 };
 
 export default colors;

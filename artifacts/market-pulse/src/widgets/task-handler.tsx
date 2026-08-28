@@ -33,7 +33,7 @@ async function renderNewsWidget(widgetInfo: WidgetInfo, preferences: WidgetPrefe
 }
 
 function WidgetError({
-  title = 'MARKET PULSE',
+  title = 'COINBEAT',
   message,
   colorTheme = 'midnight',
   fontSize = 'default',
@@ -59,9 +59,9 @@ export async function renderMarketPulseWidget(widgetName: string, widgetInfo: Wi
   try {
     if (widgetName === 'MarketPrice') return await renderPriceWidget(widgetInfo, preferences);
     if (widgetName === 'MarketNews') return await renderNewsWidget(widgetInfo, preferences);
-    return <WidgetError title="MARKET PULSE" message="알 수 없는 위젯입니다. 탭하여 다시 설정하세요." colorTheme={preferences.colorTheme} fontSize={preferences.fontSize} />;
+    return <WidgetError title="COINBEAT" message="알 수 없는 위젯입니다. 탭하여 다시 설정하세요." colorTheme={preferences.colorTheme} fontSize={preferences.fontSize} />;
   } catch (error) {
-    const label = widgetName === 'MarketNews' ? 'MARKET PULSE NEWS' : 'MARKET PULSE · KRW';
+    const label = widgetName === 'MarketNews' ? 'COINBEAT NEWS' : 'COINBEAT · KRW';
     const message = error instanceof Error ? error.message : '위젯을 불러오지 못했습니다.';
     return <WidgetError title={label} message={message} colorTheme={preferences.colorTheme} fontSize={preferences.fontSize} />;
   }

@@ -30,11 +30,11 @@ export function MarketPriceWidget({
     <FlexWidget
       clickAction="OPEN_URI"
       clickActionData={{ uri: 'market-pulse://widgets' }}
-      accessibilityLabel="Market Pulse 실시간 KRW 가격"
+      accessibilityLabel="CoinBeat 실시간 KRW 가격"
       style={{ backgroundColor: theme.background, borderRadius: 22, padding: 16, flexDirection: 'column', flexGap: 10 }}
     >
       <FlexWidget style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <TextWidget text="MARKET PULSE · KRW" style={{ color: theme.foreground, fontSize: f(13), fontWeight: '700' }} />
+        <TextWidget text="COINBEAT · KRW" style={{ color: theme.foreground, fontSize: f(13), fontWeight: '700' }} />
         <TextWidget text="실시간" style={{ color: theme.positive, fontSize: f(11), fontWeight: '700' }} />
       </FlexWidget>
       <FlexWidget style={{ flexDirection: 'column', flexGap: 8 }}>
