@@ -6,3 +6,4 @@
 - [Android widget compiler exclusion](android-widget-compiler-exclusion.md) — Widget JSX must opt out of React Compiler or Android can add a blank widget despite successful API calls.
 - [Widget background fetch resilience](widget-background-fetch-resilience.md) — Background widget data fetches need timeout+retry and a last-known-good cache, or transient network gaps show a permanent error placeholder.
 - [Third-party API key hardening](third-party-api-key-hardening.md) — Server-only key access, timeout-wrapped fetch, and sanitized error responses established as the required pattern for any new external API integration.
+- [Native widget porting](native-widget-porting.md) — Reimplement web/Tailwind widget mockups with FlexWidget/TextWidget primitives; mirror the design a second time for any in-app preview screen.

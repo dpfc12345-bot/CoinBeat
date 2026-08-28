@@ -22,6 +22,7 @@ async function renderPriceWidget(widgetInfo: WidgetInfo, preferences: WidgetPref
       widgetInfo={widgetInfo}
       colorTheme={preferences.colorTheme}
       fontSize={preferences.fontSize}
+      design={preferences.priceDesign}
     />
   );
 }
@@ -29,7 +30,7 @@ async function renderPriceWidget(widgetInfo: WidgetInfo, preferences: WidgetPref
 async function renderNewsWidget(widgetInfo: WidgetInfo, preferences: WidgetPreferences) {
   const news = await getNewsWidgetData();
   if (news.length === 0) throw new Error('표시할 최신 뉴스가 없습니다.');
-  return <MarketNewsWidget items={news} widgetInfo={widgetInfo} colorTheme={preferences.colorTheme} fontSize={preferences.fontSize} />;
+  return <MarketNewsWidget items={news} widgetInfo={widgetInfo} colorTheme={preferences.colorTheme} fontSize={preferences.fontSize} design={preferences.newsDesign} />;
 }
 
 function WidgetError({
