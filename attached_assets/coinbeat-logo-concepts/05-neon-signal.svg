@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 163">
+<!-- SVG created with Arrow, by QuiverAI (https://quiver.ai) -->
+  <style type="text/css">.cls-0 {fill:#5E7297;}
+.cls-1 {fill:#003C7D;}
+.cls-2 {fill:url(#SVGID_1_);}
+.cls-3 {fill:url(#SVGID_2_);}
+.cls-4 {fill:url(#SVGID_3_);}</style>
+  <polygon class="cls-1" points="12.3 48 128 48 128 115.4 69.9 147.9 12.3 115.4"/>
+  <radialGradient id="SVGID_1_" cx="69.92" cy="78.96" r="20.26" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#F47B80" offset="0"/>
+    <stop stop-color="#F15A5B" offset=".6"/>
+    <stop stop-color="#F47B80" offset="1"/>
+  </radialGradient>
+  <path class="cls-2" d="m71.8 71 15.1 11.2-15.1 5.7v-16.9z"/>
+  <linearGradient id="SVGID_2_" x1="67.89" x2="71.78" y1="83.31" y2="83.31" gradientTransform="matrix(1 0 0 -1 0 164)" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#66ECFF" offset="0"/>
+    <stop stop-color="#00BBF9" offset="1"/>
+  </linearGradient>
+  <path class="cls-3" d="m67.9 17 2-1.1 1.9 1.1v129.4l-1.8 1.5-2.1-1.1v-129.8z"/>
+  <radialGradient id="SVGID_3_" cx="69.83" cy="146.5" r="14.57" gradientTransform="matrix(1 0 0 -9.413 0 1440)" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#66CBEB" stop-opacity=".5" offset="0"/>
+    <stop stop-color="#004F97" stop-opacity=".75" offset=".7"/>
+  </radialGradient>
+  <path class="cls-4" d="m67.7 146.8-7.7-4.3v-121.6l7.9-3.9-0.2 129.8z"/>
+</svg>

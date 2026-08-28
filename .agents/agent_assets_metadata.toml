@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "dyj4fwU6njdc4b1-wJcqR"
+uri = "file://attached_assets/coinbeat-logo-concepts.html"
+type = "text"
+title = "CoinBeat 로고 10종 시안"
+description = "Pulse Orbit, CB Monogram, Beat Coin 등 10가지 심볼+워드마크 방향을 한 화면에서 비교하는 보드입니다."
+logical_id = "583804bc-674d-4ae7-becd-c778421534d6"
+content_hash = "sha256:54a1a61edc94d154b694e9baa78f44c2dae48c89eddb5638a155494dc6ecdd87"
+size = 28132
+mtime_ms = 1787902691027
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:07e64046-ea6c-436a-ba81-cf70d90e18b4/583804bc-674d-4ae7-becd-c778421534d6/30dffe77-01cd-4b47-a8ed-51bf9955d961"
+storage_version_token = "1787902699549796"
+content_type = "text/html"
