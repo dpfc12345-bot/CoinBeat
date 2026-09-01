@@ -6,6 +6,7 @@ import Svg, { Circle, Defs, LinearGradient, Path, Polyline, Stop } from 'react-n
 import { useColors } from '@/hooks/useColors';
 import { MarketAsset, NewsItem } from '@/src/models';
 import { useWatchlist } from '@/src/context/WatchlistContext';
+import { getTermOfTheDay } from '@/src/data/cryptoTerms';
 
 export const formatPrice = (value: number) => `₩${Math.round(value).toLocaleString('ko-KR')}`;
 export const formatPercent = (value: number) => (value >= 0 ? '+' : '') + value.toFixed(2) + '%';
@@ -183,6 +184,22 @@ export function TopMovers({ assets }: { assets: MarketAsset[] }) {
 
 function MoverRow({ asset }: { asset: MarketAsset }) { const colors = useColors(); return <Pressable testID={`mover-${asset.symbol}`} onPress={() => router.push(`/coin/${asset.symbol}`)} style={({ pressed }) => [styles.moverRow, { borderBottomColor: colors.border, opacity: pressed ? 0.65 : 1 }]}><Text style={[styles.symbolText, { color: colors.foreground }]}>{asset.symbol}</Text><Text style={[styles.moverChange, { color: asset.change24h >= 0 ? colors.positive : colors.negative }]}>{formatPercent(asset.change24h)}</Text><Ionicons name="chevron-forward" size={14} color={colors.mutedForeground} /></Pressable>; }
 
+export function TermOfDayCard() {
+  const colors = useColors();
+  const term = getTermOfTheDay();
+  return (
+    <View style={[styles.termCard, { backgroundColor: colors.card }, shadow(colors.background, 0.28, 16, 6)]}>
+      <View style={styles.impactHeader}>
+        <View style={[styles.impactIcon, { backgroundColor: colors.amber }]}><Ionicons name="bulb-outline" size={14} color={colors.primaryForeground} /></View>
+        <Text style={[styles.cardKicker, { color: colors.foreground }]}>오늘의 코인 용어</Text>
+      </View>
+      <Text style={[styles.termTitle, { color: colors.foreground }]}>{term.term}</Text>
+      <Text style={[styles.termShort, { color: colors.primary }]}>{term.short}</Text>
+      <Text style={[styles.termDetail, { color: colors.secondaryForeground }]}>{term.detail}</Text>
+    </View>
+  );
+}
+
 export function WatchlistToggle({ symbol }: { symbol: string }) { const colors = useColors(); const { contains, toggle } = useWatchlist(); const active = contains(symbol); return <Pressable testID={`watchlist-toggle-${symbol}`} onPress={() => toggle(symbol)} style={({ pressed }) => [styles.watchButton, { backgroundColor: active ? colors.primary : colors.card, opacity: pressed ? 0.7 : 1 }, shadow(colors.background, 0.24, 10, 4)]}><Ionicons name={active ? 'star' : 'star-outline'} size={16} color={active ? colors.primaryForeground : colors.primary} /></Pressable>; }
 
 const styles = StyleSheet.create({
@@ -236,6 +253,11 @@ const styles = StyleSheet.create({
   impactSymbol: { fontFamily: 'Inter_700Bold', fontSize: 22, letterSpacing: -0.5 },
   impactMetric: { alignItems: 'flex-end', gap: 4 },
   impactMetricValue: { fontFamily: 'Inter_700Bold', fontSize: 14, fontVariant: ['tabular-nums'] },
+
+  termCard: { borderRadius: 20, padding: 17, marginTop: 10, gap: 8 },
+  termTitle: { fontFamily: 'Inter_700Bold', fontSize: 22, letterSpacing: -0.5, marginTop: 2 },
+  termShort: { fontFamily: 'Inter_600SemiBold', fontSize: 13 },
+  termDetail: { fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 19, marginTop: 2 },
 
   moversGrid: { flexDirection: 'row', gap: 10 },
   moverColumn: { flex: 1, paddingHorizontal: 14, paddingTop: 15, paddingBottom: 4, borderRadius: 18 },

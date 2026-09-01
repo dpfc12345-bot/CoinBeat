@@ -58,7 +58,7 @@ function RoomDesign({ items, theme, f, bucket }: { items: WidgetNews[]; theme: W
   const count = bucket === 'large' ? 4 : bucket === 'medium' ? 3 : 2;
   return (
     <FlexWidget style={{ flexDirection: 'column', flexGap: 8 }}>
-      <HeaderRow theme={theme} f={f} eyebrow="NEWSROOM STACK" kicker="블록미디어 RSS" />
+      <HeaderRow theme={theme} f={f} eyebrow="NEWSROOM STACK" kicker="실시간 뉴스" />
       {items.slice(0, count).map((item, index) => (
         <FlexWidget
           key={item.id}
@@ -87,7 +87,7 @@ function BriefDesign({ items, theme, f, bucket }: { items: WidgetNews[]; theme: 
       <FlexWidget style={{ backgroundColor: theme.surface, borderRadius: 16, padding: 12, flexDirection: 'column', flexGap: 8 }}>
         <TextWidget text={lead.title} maxLines={bucket === 'small' ? 2 : 3} truncate="END" style={{ color: theme.foreground, fontSize: f(bucket === 'large' ? 14 : 12), fontWeight: '700', lineHeight: f(18) }} />
         <FlexWidget style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <TextWidget text="블록미디어" style={{ color: theme.muted, fontSize: f(9) }} />
+          <TextWidget text="뉴스" style={{ color: theme.muted, fontSize: f(9) }} />
           <TextWidget text={lead.relativeTime} style={{ color: theme.muted, fontSize: f(9) }} />
         </FlexWidget>
       </FlexWidget>

@@ -4,8 +4,12 @@ import { priceWidgetDesignValues, newsWidgetDesignValues, type PriceWidgetDesign
 
 export type WidgetKind = 'price' | 'news';
 export type WidgetSize = 'small' | 'medium' | 'large';
+export type WidgetCurrency = 'KRW' | 'USD';
 export type { WidgetColorTheme, WidgetFontSize };
 export type { PriceWidgetDesign, NewsWidgetDesign };
+
+export const widgetCurrencyValues: WidgetCurrency[] = ['KRW', 'USD'];
+export const widgetCurrencyLabels: Record<WidgetCurrency, string> = { KRW: '원화 (KRW)', USD: '달러 (USD)' };
 
 export type WidgetPreferences = {
   kind: WidgetKind;
@@ -15,6 +19,7 @@ export type WidgetPreferences = {
   fontSize: WidgetFontSize;
   priceDesign: PriceWidgetDesign;
   newsDesign: NewsWidgetDesign;
+  currency: WidgetCurrency;
 };
 
 export const widgetPreferencesKey = 'market-pulse-widget-preferences';
@@ -26,6 +31,7 @@ export const defaultWidgetPreferences: WidgetPreferences = {
   fontSize: 'default',
   priceDesign: 'desk',
   newsDesign: 'room',
+  currency: 'KRW',
 };
 
 export async function loadWidgetPreferences(): Promise<WidgetPreferences> {
@@ -51,6 +57,9 @@ export async function loadWidgetPreferences(): Promise<WidgetPreferences> {
       newsDesign: newsWidgetDesignValues.includes(parsed.newsDesign as NewsWidgetDesign)
         ? (parsed.newsDesign as NewsWidgetDesign)
         : defaultWidgetPreferences.newsDesign,
+      currency: widgetCurrencyValues.includes(parsed.currency as WidgetCurrency)
+        ? (parsed.currency as WidgetCurrency)
+        : defaultWidgetPreferences.currency,
     };
   } catch {
     return defaultWidgetPreferences;

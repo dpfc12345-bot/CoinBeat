@@ -1,4 +1,5 @@
-import React, { createContext, type PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, type PropsWithChildren, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { AppState, type AppStateStatus } from 'react-native';
 import { defaultWidgetPreferences, loadWidgetPreferences, type WidgetPreferences, widgetPreferencesKey } from '@/src/widgets/preferences';
 import { refreshAndroidWidgets } from '@/src/widgets/refresh';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,6 +15,7 @@ const WidgetPreferencesContext = createContext<WidgetPreferencesContextValue | n
 export function WidgetPreferencesProvider({ children }: PropsWithChildren) {
   const [preferences, setPreferences] = useState<WidgetPreferences>(defaultWidgetPreferences);
   const [isLoading, setIsLoading] = useState(true);
+  const appState = useRef<AppStateStatus>(AppState.currentState);
 
   useEffect(() => {
     let active = true;
@@ -37,6 +39,24 @@ export function WidgetPreferencesProvider({ children }: PropsWithChildren) {
     return () => {
       active = false;
     };
+  }, []);
+
+  useEffect(() => {
+    // A widget added to the home screen while the app is backgrounded (the normal
+    // Android "long-press home screen -> add widget" flow) never gets an initial
+    // data push, since the mount-time refresh above only runs once at launch and
+    // the app was already running by then. Re-running the refresh every time the
+    // app comes back to the foreground closes that gap with default preferences
+    // showing up as soon as the user returns to CoinBeat.
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      const cameToForeground = appState.current.match(/inactive|background/) && nextState === 'active';
+      appState.current = nextState;
+      if (!cameToForeground) return;
+      void refreshAndroidWidgets().catch(() => {
+        // No widget may be on the Android home screen yet.
+      });
+    });
+    return () => subscription.remove();
   }, []);
 
   const savePreferences = async (next: WidgetPreferences) => {

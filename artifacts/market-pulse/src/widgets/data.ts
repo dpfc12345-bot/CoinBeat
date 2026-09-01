@@ -5,6 +5,7 @@ export type WidgetAsset = {
   symbol: string;
   name: string;
   price: number;
+  usdPrice: number;
   change24h: number;
 };
 

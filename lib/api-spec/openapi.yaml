@@ -216,6 +216,7 @@ components:
         symbol: { type: string }
         name: { type: string }
         price: { type: number }
+        usdPrice: { type: number }
         change24h: { type: number }
         volume24h: { type: string }
         marketCap: { type: string }
@@ -225,7 +226,7 @@ components:
           type: array
           items: { type: number }
         accent: { type: string }
-      required: [symbol, name, price, change24h, volume24h, marketCap, high24h, low24h, sparkline, accent]
+      required: [symbol, name, price, usdPrice, change24h, volume24h, marketCap, high24h, low24h, sparkline, accent]
     Sentiment:
       type: object
       properties:

@@ -31,8 +31,8 @@ export default function NewsScreen() {
     : categoryFiltered;
 
   return <Screen>
-    <ScreenHeader eyebrow="블록미디어 RSS" title="뉴스" onPress={() => router.push('/settings')} />
-    <Text style={[styles.intro, { color: colors.mutedForeground }]}>블록미디어가 공개한 최신 암호화폐 헤드라인을 빠르게 확인하세요.</Text>
+    <ScreenHeader eyebrow="실시간 뉴스" title="뉴스" onPress={() => router.push('/settings')} />
+    <Text style={[styles.intro, { color: colors.mutedForeground }]}>최신 암호화폐 헤드라인을 빠르게 확인하세요.</Text>
     <View style={[styles.searchBox, { backgroundColor: colors.card }]}>
       <Ionicons name="search" size={15} color={colors.mutedForeground} />
       <TextInput testID="news-search" value={query} onChangeText={setQuery} placeholder="뉴스 검색" placeholderTextColor={colors.mutedForeground} style={[styles.searchInput, { color: colors.foreground }]} />

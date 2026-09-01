@@ -42,6 +42,7 @@ export interface MarketAsset {
   symbol: string;
   name: string;
   price: number;
+  usdPrice: number;
   change24h: number;
   volume24h: string;
   marketCap: string;

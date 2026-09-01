@@ -19,6 +19,10 @@ function NativeTabLayout() {
         <Icon sf={{ default: 'house', selected: 'house.fill' }} />
         <Label>홈</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="widgets">
+        <Icon sf={{ default: 'square.grid.2x2', selected: 'square.grid.2x2.fill' }} />
+        <Label>위젯</Label>
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="news">
         <Icon sf={{ default: 'newspaper', selected: 'newspaper.fill' }} />
         <Label>뉴스</Label>
@@ -26,10 +30,6 @@ function NativeTabLayout() {
       <NativeTabs.Trigger name="markets">
         <Icon sf={{ default: 'chart.line.uptrend.xyaxis', selected: 'chart.line.uptrend.xyaxis' }} />
         <Label>시장</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="watchlist">
-        <Icon sf={{ default: 'star', selected: 'star.fill' }} />
-        <Label>관심목록</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="settings">
         <Icon sf={{ default: 'gearshape', selected: 'gearshape.fill' }} />
@@ -89,9 +89,9 @@ function ClassicTabLayout() {
             ),
         }}
       />
+      <Tabs.Screen name="widgets" options={{ title: '위젯', tabBarIcon: ({ color }) => isIOS ? <SymbolView name="square.grid.2x2" tintColor={color} size={24} /> : <Feather name="grid" size={22} color={color} /> }} />
       <Tabs.Screen name="news" options={{ title: '뉴스', tabBarIcon: ({ color }) => isIOS ? <SymbolView name="newspaper" tintColor={color} size={24} /> : <Feather name="file-text" size={22} color={color} /> }} />
       <Tabs.Screen name="markets" options={{ title: '시장', tabBarIcon: ({ color }) => isIOS ? <SymbolView name="chart.line.uptrend.xyaxis" tintColor={color} size={24} /> : <Feather name="trending-up" size={22} color={color} /> }} />
-      <Tabs.Screen name="watchlist" options={{ title: '관심목록', tabBarIcon: ({ color }) => isIOS ? <SymbolView name="star" tintColor={color} size={24} /> : <Feather name="star" size={22} color={color} /> }} />
       <Tabs.Screen name="settings" options={{ title: '설정', tabBarIcon: ({ color }) => isIOS ? <SymbolView name="gearshape" tintColor={color} size={24} /> : <Feather name="settings" size={22} color={color} /> }} />
     </Tabs>
   );

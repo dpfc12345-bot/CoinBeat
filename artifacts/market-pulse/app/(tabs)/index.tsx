@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { Screen } from '@/src/components/Screen';
-import { ImpactWidget, MarketCard, NewsRow, ScreenHeader, SectionHeading, SentimentCard } from '@/src/components/MarketPulseUI';
+import { MarketCard, NewsRow, ScreenHeader, SectionHeading, TermOfDayCard, TopMovers } from '@/src/components/MarketPulseUI';
 import { getGetMarketOverviewQueryKey, useGetMarketOverview, useGetNews } from '@workspace/api-client-react';
 import { MARKET_REFRESH_INTERVAL_MS } from '@/src/config/api';
 
@@ -16,16 +16,12 @@ export default function HomeScreen() {
   const news = newsQuery.data ?? [];
   const leadNews = news[0];
   return <Screen>
-    <ScreenHeader eyebrow="UPBIT · 블록미디어" title="CoinBeat" onPress={() => router.push('/settings')} />
+    <ScreenHeader eyebrow="실시간 시세 · 뉴스" title="CoinBeat" onPress={() => router.push('/settings')} />
     <View style={styles.utilityRow}>
       <View style={[styles.status, { backgroundColor: colors.card }]}>
         <View style={styles.pulseDotWrap}><View style={[styles.statusDot, { backgroundColor: colors.positive }]} /></View>
-        <Text style={[styles.statusText, { color: colors.mutedForeground }]}>Upbit 실시간 · 15초마다 갱신</Text>
+        <Text style={[styles.statusText, { color: colors.mutedForeground }]}>실시간 거래소 시세 · 15초마다 갱신</Text>
       </View>
-      <Pressable testID="widget-launcher" onPress={() => router.push('/widgets')} style={({ pressed }) => [styles.widgetButton, { backgroundColor: colors.card, opacity: pressed ? 0.72 : 1 }]}>
-        <Ionicons name="grid-outline" size={14} color={colors.primary} />
-        <Text style={[styles.widgetButtonText, { color: colors.foreground }]}>위젯</Text>
-      </Pressable>
     </View>
     {leadNews ? <Pressable testID="home-lead-news" onPress={() => router.push(`/news/${leadNews.id}`)} style={({ pressed }) => [styles.hero, { backgroundColor: colors.cardElevated, opacity: pressed ? 0.9 : 1 }]}>
       <View style={[styles.heroGlow, { backgroundColor: colors.primary }]} />
@@ -48,10 +44,10 @@ export default function HomeScreen() {
     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll} contentContainerStyle={styles.marketRow}>
       {(snapshot?.assets ?? []).slice(0, 4).map((asset) => <MarketCard key={asset.symbol} asset={asset} />)}
     </ScrollView>
-    <SectionHeading label="뉴스 영향도" />
-    {leadNews && <ImpactWidget item={leadNews} />}
-    <SectionHeading label="시장 심리" />
-    {snapshot && <SentimentCard score={snapshot.sentiment.score} label={snapshot.sentiment.label} change={snapshot.sentiment.change} />}
+    <SectionHeading label="오늘의 급등·급락" action="시장" onAction={() => router.push('/markets')} />
+    {snapshot && <TopMovers assets={snapshot.assets} />}
+    <SectionHeading label="오늘의 코인 용어" />
+    <TermOfDayCard />
     <View style={[styles.marketTape, { borderTopColor: colors.border }]}>
       <Text style={[styles.tapeLabel, { color: colors.mutedForeground }]}>시장 요약</Text>
       <Text style={[styles.tapeValue, { color: colors.foreground }]}>거래량 {snapshot?.totalVolume ?? '불러오는 중'}</Text>
@@ -65,8 +61,6 @@ const styles = StyleSheet.create({
   pulseDotWrap: { width: 6, height: 6 },
   statusDot: { width: 6, height: 6, borderRadius: 3 },
   statusText: { fontFamily: 'Inter_600SemiBold', fontSize: 10.5, letterSpacing: 0.2 },
-  widgetButton: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 999, paddingHorizontal: 13, paddingVertical: 9, boxShadow: '0px 4px 10px rgba(0,0,0,0.28)' },
-  widgetButtonText: { fontFamily: 'Inter_700Bold', fontSize: 11 },
   hero: { borderRadius: 24, padding: 20, marginBottom: 2, overflow: 'hidden', boxShadow: '0px 10px 28px rgba(0,0,0,0.35)' },
   heroGlow: { position: 'absolute', top: -60, right: -40, width: 160, height: 160, borderRadius: 80, opacity: 0.14 },
   heroMeta: { flexDirection: 'row', alignItems: 'center', gap: 9 },

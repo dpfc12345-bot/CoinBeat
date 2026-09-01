@@ -7,3 +7,5 @@
 - [Widget background fetch resilience](widget-background-fetch-resilience.md) — Background widget data fetches need timeout+retry and a last-known-good cache, or transient network gaps show a permanent error placeholder.
 - [Third-party API key hardening](third-party-api-key-hardening.md) — Server-only key access, timeout-wrapped fetch, and sanitized error responses established as the required pattern for any new external API integration.
 - [Native widget porting](native-widget-porting.md) — Reimplement web/Tailwind widget mockups with FlexWidget/TextWidget primitives; mirror the design a second time for any in-app preview screen.
+- [Upbit USD price proxy](upbit-usd-price-proxy.md) — Derive a live USD price from Upbit's KRW-USDT ticker; no separate FX API needed.
+- [Android widget foreground refresh](android-widget-foreground-refresh.md) — Re-call refreshAndroidWidgets() on every app-foreground transition, not just initial mount, or widgets added while backgrounded stay blank.

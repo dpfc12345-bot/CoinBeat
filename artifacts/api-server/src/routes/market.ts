@@ -27,7 +27,15 @@ const assetMetadata = [
   { symbol: "XRP", name: "XRP", market: "KRW-XRP", accent: "#FFB86B" },
   { symbol: "DOGE", name: "도지코인", market: "KRW-DOGE", accent: "#D7C17A" },
   { symbol: "ADA", name: "에이다", market: "KRW-ADA", accent: "#7DB5FF" },
+  { symbol: "TRX", name: "트론", market: "KRW-TRX", accent: "#E8A8FF" },
+  { symbol: "AVAX", name: "아발란체", market: "KRW-AVAX", accent: "#85D4FF" },
+  { symbol: "DOT", name: "폴카닷", market: "KRW-DOT", accent: "#F19FB0" },
+  { symbol: "LINK", name: "체인링크", market: "KRW-LINK", accent: "#8FD1FF" },
 ] as const;
+
+// Only these major coins are surfaced to keep the list focused and reduce the
+// chance that a single obscure/delisted market breaks the whole ticker batch.
+const majorMarketCodes = new Set<string>(assetMetadata.map((asset) => asset.market));
 
 const fallbackAccents = ["#C9F64A", "#A7B1FF", "#70E1D2", "#FFB86B", "#D7C17A", "#7DB5FF", "#E8A8FF", "#85D4FF"];
 
@@ -50,6 +58,7 @@ type LiveAsset = {
   symbol: string;
   name: string;
   price: number;
+  usdPrice: number;
   change24h: number;
   volume24h: string;
   marketCap: string;
@@ -103,29 +112,51 @@ async function getLiveAssets(): Promise<LiveAsset[]> {
   return assetRequestInFlight;
 }
 
-async function loadLiveAssets(): Promise<LiveAsset[]> {
-  const marketResponse = cachedMarkets && cachedMarkets.expiresAt > Date.now()
+async function loadLiveAssets(retryWithFreshMarkets = true): Promise<LiveAsset[]> {
+  const usingCachedMarkets = Boolean(cachedMarkets && cachedMarkets.expiresAt > Date.now());
+  const marketResponse = usingCachedMarkets
     ? undefined
     : await fetchExternal("https://api.upbit.com/v1/market/all?isDetails=false");
   if (marketResponse && !marketResponse.ok) {
     throw new Error(`Upbit 마켓 목록을 불러오지 못했습니다 (${marketResponse.status}).`);
   }
-  const markets = cachedMarkets && cachedMarkets.expiresAt > Date.now()
-    ? cachedMarkets.value
-    : (await marketResponse!.json() as UpbitMarket[]).filter((market) => market.market.startsWith("KRW-"));
+  const markets = usingCachedMarkets
+    ? cachedMarkets!.value
+    // KRW-USDT is fetched alongside the major coins purely to derive a live KRW-per-USD
+    // rate (see finishLoadingAssets); it is excluded from the displayed asset list.
+    : (await marketResponse!.json() as UpbitMarket[]).filter((market) => majorMarketCodes.has(market.market) || market.market === "KRW-USDT");
   if (markets.length === 0) throw new Error("Upbit KRW 마켓이 없습니다.");
   cachedMarkets = { value: markets, expiresAt: Date.now() + 24 * 60 * 60 * 1000 };
 
   const marketChunks = Array.from({ length: Math.ceil(markets.length / 100) }, (_, index) => markets.slice(index * 100, (index + 1) * 100));
-  const tickerChunks = await Promise.all(marketChunks.map(async (marketChunk) => {
-    const marketList = marketChunk.map((market) => market.market).join(",");
-    const tickerResponse = await fetchExternal(`https://api.upbit.com/v1/ticker?markets=${encodeURIComponent(marketList)}`);
-    if (!tickerResponse.ok) throw new Error(`Upbit 시세를 불러오지 못했습니다 (${tickerResponse.status}).`);
-    return tickerResponse.json() as Promise<UpbitTicker[]>;
-  }));
-  const tickers = tickerChunks.flat();
+  try {
+    const tickerChunks = await Promise.all(marketChunks.map(async (marketChunk) => {
+      const marketList = marketChunk.map((market) => market.market).join(",");
+      const tickerResponse = await fetchExternal(`https://api.upbit.com/v1/ticker?markets=${encodeURIComponent(marketList)}`);
+      if (!tickerResponse.ok) throw new Error(`Upbit 시세를 불러오지 못했습니다 (${tickerResponse.status}).`);
+      return tickerResponse.json() as Promise<UpbitTicker[]>;
+    }));
+    return finishLoadingAssets(markets, tickerChunks.flat());
+  } catch (error) {
+    // Upbit's ticker endpoint rejects the *entire* batch with a 404 if a single
+    // market code in the comma-separated list is no longer listed (e.g. delisted
+    // since we cached the market list up to 24h ago). Refresh the market list
+    // once and retry instead of failing every asset because of one stale code.
+    if (usingCachedMarkets && retryWithFreshMarkets) {
+      cachedMarkets = undefined;
+      logger.warn({ err: error }, "Upbit ticker batch failed with cached market list; retrying with a fresh list");
+      return loadLiveAssets(false);
+    }
+    throw error;
+  }
+}
+
+function finishLoadingAssets(markets: UpbitMarket[], tickers: UpbitTicker[]): LiveAsset[] {
 
   const tickersByMarket = new Map(tickers.map((ticker) => [ticker.market, ticker]));
+  // Upbit only quotes in KRW. KRW-USDT is a KRW pair for a USD-pegged stablecoin,
+  // so its price is the best available live KRW-per-USD rate without a separate FX API.
+  const krwPerUsd = tickersByMarket.get("KRW-USDT")?.trade_price ?? 1_400;
   const knownAccents: Record<string, string> = Object.fromEntries(assetMetadata.map((asset) => [asset.symbol, asset.accent]));
   const accentFor = (symbol: string) => {
     const knownAccent = knownAccents[symbol];
@@ -135,6 +166,7 @@ async function loadLiveAssets(): Promise<LiveAsset[]> {
   };
 
   const value = markets
+    .filter((market) => market.market !== "KRW-USDT")
     .map((market) => {
       const ticker = tickersByMarket.get(market.market);
       if (!ticker) return null;
@@ -144,9 +176,10 @@ async function loadLiveAssets(): Promise<LiveAsset[]> {
         symbol,
         name,
         price: ticker.trade_price,
+        usdPrice: ticker.trade_price / krwPerUsd,
         change24h: Number((ticker.signed_change_rate * 100).toFixed(2)),
         volume24h: formatKrw(ticker.acc_trade_price_24h),
-        marketCap: "Upbit 미제공",
+        marketCap: "미제공",
         high24h: ticker.high_price,
         low24h: ticker.low_price,
         // The ticker endpoint is enough for the fast overview. A two-point
@@ -211,7 +244,7 @@ async function getLiveNews(): Promise<LiveNewsItem[]> {
       id: `blockmedia-${createHash("sha256").update(link).digest("base64url").slice(0, 20)}`,
       title,
       content: description,
-      source: "블록미디어",
+      source: "뉴스",
       sourceUrl: link,
       publishedAt: new Date(publishedAt).toISOString(),
       relativeTime: relativeTime(publishedAt),
@@ -298,9 +331,9 @@ router.get("/market/overview", async (_req, res): Promise<void> => {
     res.json(GetMarketOverviewResponse.parse({
       assets,
       sentiment: { score: 50, label: "NEUTRAL", change: 0 },
-      totalMarketCap: "Upbit 미제공",
+      totalMarketCap: "미제공",
       totalVolume: formatKrw(assets.reduce((total, asset) => total + Number(asset.volume24h.replace(/[^\d]/g, "")), 0)),
-      btcDominance: "Upbit 미제공",
+      btcDominance: "미제공",
       updatedAt: "실시간",
     }));
   } catch (error) {

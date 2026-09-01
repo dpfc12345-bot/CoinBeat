@@ -23,6 +23,7 @@ async function renderPriceWidget(widgetInfo: WidgetInfo, preferences: WidgetPref
       colorTheme={preferences.colorTheme}
       fontSize={preferences.fontSize}
       design={preferences.priceDesign}
+      currency={preferences.currency}
     />
   );
 }

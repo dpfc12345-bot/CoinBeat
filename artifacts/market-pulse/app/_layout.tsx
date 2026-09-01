@@ -34,8 +34,10 @@ function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerBackTitle: 'Back' }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="widgets" options={{ headerShown: false }} />
         <Stack.Screen name="news/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="coin/[symbol]" options={{ headerShown: false }} />
+        <Stack.Screen name="legal/terms" options={{ headerShown: false }} />
+        <Stack.Screen name="legal/privacy" options={{ headerShown: false }} />
     </Stack>
   );
 }
